@@ -71,8 +71,6 @@ public enum WunderKisteDomain implements StringRepresentable {
                 if (useMonochromeFallback) this.texture = WunderreichClient.getWunderkisteColor("wunder_kiste_bw");
                 else this.texture = WunderreichClient.getWunderkisteColor("wunder_kiste");
             }
-        } else {
-            this.texture = null;
         }
     }
 
