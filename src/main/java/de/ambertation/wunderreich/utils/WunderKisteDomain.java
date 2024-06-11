@@ -49,7 +49,7 @@ public enum WunderKisteDomain implements StringRepresentable {
     private final String name;
     public final boolean useMonochromeFallback;
     @Environment(EnvType.CLIENT)
-    private final Object texture;
+    private Object texture;
 
     WunderKisteDomain(String name, Item triggerItem, int color, boolean useMonochromeFallback, String texture) {
         this.name = name;
