@@ -1,16 +1,10 @@
 package de.ambertation.wunderreich.registries;
 
-import de.ambertation.wunderlib.math.sdf.SDFUnion;
-import de.ambertation.wunderlib.math.sdf.shapes.Box;
-import de.ambertation.wunderlib.math.sdf.shapes.Cylinder;
-import de.ambertation.wunderlib.math.sdf.shapes.Sphere;
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.config.Configs;
 import de.ambertation.wunderreich.items.BuildersTrowel;
 import de.ambertation.wunderreich.items.TrainedVillagerWhisperer;
 import de.ambertation.wunderreich.items.VillagerWhisperer;
-import de.ambertation.wunderreich.items.construction.BluePrint;
-import de.ambertation.wunderreich.items.construction.Ruler;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -49,41 +43,6 @@ public class WunderreichItems {
             "diamond_builders_trowel",
             () -> new BuildersTrowel(Tiers.DIAMOND),
             Configs.MAIN.allowBuilderTools.get()
-    );
-
-    public static Item RULER = registerItem(
-            "ruler",
-            Ruler::new,
-            Configs.MAIN.allowConstructionTools.get()
-    );
-
-    public static Item BLUE_PRINT = registerItem(
-            "blueprint_empty",
-            () -> new BluePrint(null),
-            Configs.MAIN.allowConstructionTools.get()
-    );
-
-    public static Item BLUE_PRINT_SPHERE = registerItem(
-            "blueprint_sphere",
-            () -> new BluePrint(() -> new Sphere(Sphere.DEFAULT_TRANSFORM, 0)),
-            Configs.MAIN.allowConstructionTools.get()
-    );
-
-    public static Item BLUE_PRINT_BOX = registerItem(
-            "blueprint_box",
-            () -> new BluePrint(() -> new Box(Box.DEFAULT_TRANSFORM, 0)),
-            Configs.MAIN.allowConstructionTools.get()
-    );
-
-    public static Item BLUE_PRINT_CYLINDER = registerItem(
-            "blueprint_cylinder",
-            () -> new BluePrint(() -> new Cylinder(Cylinder.DEFAULT_TRANSFORM, 0)),
-            Configs.MAIN.allowConstructionTools.get()
-    );
-    public static Item BLUE_PRINT_UNION = registerItem(
-            "blueprint_union",
-            () -> new BluePrint(() -> new SDFUnion(null, null)),
-            Configs.MAIN.allowConstructionTools.get()
     );
 
     @NotNull

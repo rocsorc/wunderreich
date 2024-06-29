@@ -1,7 +1,6 @@
 package de.ambertation.wunderreich.registries;
 
 import de.ambertation.wunderreich.Wunderreich;
-import de.ambertation.wunderreich.gui.construction.RulerContainerMenu;
 import de.ambertation.wunderreich.gui.whisperer.WhispererMenu;
 
 import net.minecraft.core.Registry;
@@ -21,11 +20,6 @@ public class WunderreichMenuTypes {
     public static final MenuType<WhispererMenu> WHISPERER = registerSimple(
             Wunderreich.ID("whisperer"),
             WhispererMenu::new
-    );
-    
-    public static final MenuType<RulerContainerMenu> RULER = registerExtended(
-            Wunderreich.ID("ruler"),
-            RulerContainerMenu::new
     );
 
     static <T extends AbstractContainerMenu> MenuType<T> registerExtended(

@@ -41,15 +41,6 @@ public class MainConfig extends ConfigFile {
             true
     ).setGroup(TOOLS_GROUP);
 
-    public final BooleanValue allowConstructionTools = new BooleanValue(
-            FEATURE_CATEGORY,
-            "allowExperimentalConstructionTools",
-            false
-    ).and(allowBuilderTools)
-     .and(() -> false) //Force disable
-     .hideInUI() //Hide in UI
-     .setGroup(TOOLS_GROUP);
-
     public final BooleanValue addSlabs = new BooleanValue(
             FEATURE_CATEGORY,
             "addSlabs",
