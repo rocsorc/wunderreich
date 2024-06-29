@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -39,7 +40,7 @@ public class EMIPlugin implements dev.emi.emi.api.EmiPlugin {
         return new EmiTexture(WIDGETS, u, v, 16, 16, 16, 16, 16, 16);
     }
 
-    public static <C extends Container, T extends Recipe<C>, E extends EmiRecipe> void addAllRecipes(
+    public static <C extends RecipeInput, T extends Recipe<C>, E extends EmiRecipe> void addAllRecipes(
             EmiRegistry emiRegistry,
             RecipeManager manager,
             Logger logger,

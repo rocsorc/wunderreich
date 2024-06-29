@@ -11,7 +11,6 @@ import net.minecraft.world.phys.Vec3;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import java.util.LinkedList;
@@ -26,7 +25,7 @@ public class RenderContext {
     public Vec3 worldToCamSpace;
     public Float3 camToWorldSpace;
     private Matrix4f pose;
-    private Matrix3f normal;
+    private PoseStack.Pose normal;
     private List<TextRenderer.TextItem> textItems = new LinkedList<>();
 
 
@@ -38,7 +37,7 @@ public class RenderContext {
         this.poseStack = poseStack;
         if (poseStack != null) {
             this.pose = poseStack.last().pose();
-            this.normal = poseStack.last().normal();
+            this.normal = poseStack.last();
         } else {
             this.pose = null;
             this.normal = null;
@@ -62,7 +61,7 @@ public class RenderContext {
         return pose;
     }
 
-    public Matrix3f normal() {
+    public PoseStack.Pose normal() {
         return normal;
     }
 

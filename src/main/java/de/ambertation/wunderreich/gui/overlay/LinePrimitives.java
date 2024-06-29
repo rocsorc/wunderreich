@@ -5,13 +5,13 @@ import de.ambertation.wunderlib.math.Float2;
 import de.ambertation.wunderlib.math.Float3;
 import de.ambertation.wunderlib.math.Transform;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.FastColor;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
@@ -22,22 +22,21 @@ public class LinePrimitives {
             RenderContext ctx,
             Float3 p,
             float nx, float ny, float nz,
-            int r, int g, int b, int a
+            int color
     ) {
-        ctx.vertexConsumer.vertex(ctx.pose(), (float) p.x, (float) p.y, (float) p.z)
-                          .color(r, g, b, a)
-                          .normal(ctx.normal(), nx, ny, nz)
-                          .endVertex();
+        ctx.vertexConsumer.addVertex(ctx.pose(), (float) p.x, (float) p.y, (float) p.z)
+                          .setColor(color)
+                          .setNormal(ctx.normal(), nx, ny, nz);
     }
 
     private static void addVertex(
             RenderContext ctx,
             int corner,
             float nx, float ny, float nz,
-            int r, int g, int b, int a,
+            int color,
             Float3[] corners
     ) {
-        addVertex(ctx, corners[corner], nx, ny, nz, r, g, b, a);
+        addVertex(ctx, corners[corner], nx, ny, nz, color);
     }
 
 
@@ -48,36 +47,33 @@ public class LinePrimitives {
             int color, float alpha
     ) {
         addLine(ctx, start.add(ctx.worldToCamSpace), end.add(ctx.worldToCamSpace),
-                FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
     private static void addLine(
             RenderContext ctx,
             Bounds.Interpolate cornerStart, Bounds.Interpolate cornerEnd,
-            int r, int g, int b, int a, Float3[] corners
+            int color, Float3[] corners
     ) {
         Float3 start = corners[cornerStart.idx];
         Float3 end = corners[cornerEnd.idx];
         Float3 n = end.sub(start).normalized();
 
-        addVertex(ctx, start, (float) n.x, (float) n.y, (float) n.z, r, g, b, a);
-        addVertex(ctx, end, (float) n.x, (float) n.y, (float) n.z, r, g, b, a);
+        addVertex(ctx, start, (float) n.x, (float) n.y, (float) n.z, color);
+        addVertex(ctx, end, (float) n.x, (float) n.y, (float) n.z, color);
     }
 
 
     private static void addLine(
             RenderContext ctx,
             Float3 start, Float3 end,
-            int r, int g, int b, int a
+            int color
     ) {
         Float3 n = end.sub(start).normalized();
 
-        addVertex(ctx, start, (float) n.x, (float) n.y, (float) n.z, r, g, b, a);
-        addVertex(ctx, end, (float) n.x, (float) n.y, (float) n.z, r, g, b, a);
+        addVertex(ctx, start, (float) n.x, (float) n.y, (float) n.z, color);
+        addVertex(ctx, end, (float) n.x, (float) n.y, (float) n.z, color);
     }
 
     //-------------------------------------- 2D Shapes --------------------------------------
@@ -87,10 +83,7 @@ public class LinePrimitives {
             int color, float alpha
     ) {
         renderQuad(ctx, p1, p2, p3, p4,
-                FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
@@ -106,17 +99,14 @@ public class LinePrimitives {
                 center.add(sz.mul(Float3.XmZ_PLANE)),
                 center.add(sz.mul(Float3.mXmZ_PLANE)),
                 center.add(sz.mul(Float3.mXZ_PLANE)),
-                FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
     public static void renderQuad(
             RenderContext ctx,
             Float3 p1, Float3 p2, Float3 p3, Float3 p4,
-            int r, int g, int b, int a
+            int color
     ) {
         renderQuadCameraSpace(
                 ctx,
@@ -124,19 +114,19 @@ public class LinePrimitives {
                 p2.add(ctx.worldToCamSpace),
                 p3.add(ctx.worldToCamSpace),
                 p4.add(ctx.worldToCamSpace),
-                r, g, b, a
+                color
         );
     }
 
     private static void renderQuadCameraSpace(
             RenderContext ctx,
             Float3 p1, Float3 p2, Float3 p3, Float3 p4,
-            int r, int g, int b, int a
+            int color
     ) {
-        addLine(ctx, p1, p2, r, g, b, a);
-        addLine(ctx, p2, p3, r, g, b, a);
-        addLine(ctx, p3, p4, r, g, b, a);
-        addLine(ctx, p4, p1, r, g, b, a);
+        addLine(ctx, p1, p2, color);
+        addLine(ctx, p2, p3, color);
+        addLine(ctx, p3, p4, color);
+        addLine(ctx, p4, p1, color);
     }
 
     //-------------------------------------- SINGLE BLOCKS --------------------------------------
@@ -153,8 +143,7 @@ public class LinePrimitives {
         renderCubeOutlineCameraSpace(ctx,
                 x + deflate, y + deflate, z + deflate,
                 1 + x - deflate, 1 + y - deflate, 1 + z - deflate,
-                FastColor.ARGB32.red(color), FastColor.ARGB32.green(color), FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
@@ -165,8 +154,7 @@ public class LinePrimitives {
         renderCubeOutlineCameraSpace(ctx,
                 x + deflate, y + deflate, z + deflate,
                 1 + x - deflate, 1 + y - deflate, 1 + z - deflate,
-                FastColor.ARGB32.red(color), FastColor.ARGB32.green(color), FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
@@ -180,10 +168,7 @@ public class LinePrimitives {
                 (float) (bounds.max.x + ctx.worldToCamSpace.x) - deflate + 0.5f,
                 (float) (bounds.max.y + ctx.worldToCamSpace.y) - deflate + 0.5f,
                 (float) (bounds.max.z + ctx.worldToCamSpace.z) - deflate + 0.5f,
-                FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
@@ -191,48 +176,44 @@ public class LinePrimitives {
             RenderContext ctx,
             float lx, float ly, float lz,
             float hx, float hy, float hz,
-            int r, int g, int b, int a
+            int color
     ) {
         final Matrix4f pose = ctx.pose();
-        final Matrix3f normal = ctx.normal();
+        final PoseStack.Pose normal = ctx.normal();
 
-        ctx.vertexConsumer.vertex(pose, lx, ly, lz).color(r, g, b, a).normal(normal, 1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, ly, lz).color(r, g, b, a).normal(normal, 1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, ly, lz).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, hy, lz).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, ly, lz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, 1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, ly, hz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, 1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, ly, lz).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, hy, lz).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, hy, lz).color(r, g, b, a).normal(normal, -1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, hy, lz).color(r, g, b, a).normal(normal, -1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, hy, lz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, 1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, hy, hz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, 1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, hy, hz).color(r, g, b, a).normal(normal, 0.0F, -1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, ly, hz).color(r, g, b, a).normal(normal, 0.0F, -1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, ly, hz).color(r, g, b, a).normal(normal, 1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, ly, hz).color(r, g, b, a).normal(normal, 1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, ly, hz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, -1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, ly, lz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, -1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, lx, hy, hz).color(r, g, b, a).normal(normal, 1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, hy, hz).color(r, g, b, a).normal(normal, 1.0F, 0.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, ly, hz).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, hy, hz).color(r, g, b, a).normal(normal, 0.0F, 1.0F, 0.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, hy, lz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, 1.0F).endVertex();
-        ctx.vertexConsumer.vertex(pose, hx, hy, hz).color(r, g, b, a).normal(normal, 0.0F, 0.0F, 1.0F).endVertex();
+        ctx.vertexConsumer.addVertex(pose, lx, ly, lz).setColor(color).setNormal(normal, 1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, ly, lz).setColor(color).setNormal(normal, 1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, ly, lz).setColor(color).setNormal(normal, 0.0F, 1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, hy, lz).setColor(color).setNormal(normal, 0.0F, 1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, ly, lz).setColor(color).setNormal(normal, 0.0F, 0.0F, 1.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, ly, hz).setColor(color).setNormal(normal, 0.0F, 0.0F, 1.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, ly, lz).setColor(color).setNormal(normal, 0.0F, 1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, hy, lz).setColor(color).setNormal(normal, 0.0F, 1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, hy, lz).setColor(color).setNormal(normal, -1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, hy, lz).setColor(color).setNormal(normal, -1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, hy, lz).setColor(color).setNormal(normal, 0.0F, 0.0F, 1.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, hy, hz).setColor(color).setNormal(normal, 0.0F, 0.0F, 1.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, hy, hz).setColor(color).setNormal(normal, 0.0F, -1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, ly, hz).setColor(color).setNormal(normal, 0.0F, -1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, ly, hz).setColor(color).setNormal(normal, 1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, ly, hz).setColor(color).setNormal(normal, 1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, ly, hz).setColor(color).setNormal(normal, 0.0F, 0.0F, -1.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, ly, lz).setColor(color).setNormal(normal, 0.0F, 0.0F, -1.0F);
+        ctx.vertexConsumer.addVertex(pose, lx, hy, hz).setColor(color).setNormal(normal, 1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, hy, hz).setColor(color).setNormal(normal, 1.0F, 0.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, ly, hz).setColor(color).setNormal(normal, 0.0F, 1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, hy, hz).setColor(color).setNormal(normal, 0.0F, 1.0F, 0.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, hy, lz).setColor(color).setNormal(normal, 0.0F, 0.0F, 1.0F);
+        ctx.vertexConsumer.addVertex(pose, hx, hy, hz).setColor(color).setNormal(normal, 0.0F, 0.0F, 1.0F);
     }
 
 
     //-------------------------------------- TRANSFORMS --------------------------------------
     public static void renderTransform(RenderContext ctx, Transform t, int color, float alpha) {
-        renderTransform(ctx, t, FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
-        );
+        renderTransform(ctx, t, FastColor.ARGB32.color(color, (int) (alpha * 0xFF)));
     }
 
-    private static void renderTransform(RenderContext ctx, Transform t, int r, int g, int b, int a) {
+    private static void renderTransform(RenderContext ctx, Transform t, int color) {
         Float3[] corners = t.translate(ctx.worldToCamSpace).getCornersInWorldSpace(false);
 
         ctx.pushText(
@@ -243,7 +224,7 @@ public class LinePrimitives {
                 OverlayRenderer.COLOR_BOUNDING_BOX
         );
 
-        renderCornersInCamSpace(ctx, corners, r, g, b, a);
+        renderCornersInCamSpace(ctx, corners, color);
     }
 
     public static void renderCorners(RenderContext ctx, Float3[] corners, int color, float alpha) {
@@ -251,77 +232,73 @@ public class LinePrimitives {
         for (int i = 0; i < camCorners.length; i++) {
             camCorners[i] = corners[i].add(ctx.worldToCamSpace);
         }
-        renderCornersInCamSpace(ctx, camCorners, FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
-        );
+        renderCornersInCamSpace(ctx, camCorners, FastColor.ARGB32.color(color, (int) (alpha * 0xFF)));
     }
 
-    public static void renderCornersInCamSpace(RenderContext ctx, Float3[] corners, int r, int g, int b, int a) {
+    public static void renderCornersInCamSpace(RenderContext ctx, Float3[] corners, int color) {
         addLine(ctx,
                 Bounds.Interpolate.MIN_MIN_MIN,
                 Bounds.Interpolate.MAX_MIN_MIN,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MAX_MIN_MIN,
                 Bounds.Interpolate.MAX_MIN_MAX,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MAX_MIN_MAX,
                 Bounds.Interpolate.MIN_MIN_MAX,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MIN_MIN_MAX,
                 Bounds.Interpolate.MIN_MIN_MIN,
-                r, g, b, a, corners
+                color, corners
         );
 
 
         addLine(ctx,
                 Bounds.Interpolate.MIN_MAX_MIN,
                 Bounds.Interpolate.MAX_MAX_MIN,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MAX_MAX_MIN,
                 Bounds.Interpolate.MAX_MAX_MAX,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MAX_MAX_MAX,
                 Bounds.Interpolate.MIN_MAX_MAX,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MIN_MAX_MAX,
                 Bounds.Interpolate.MIN_MAX_MIN,
-                r, g, b, a, corners
+                color, corners
         );
 
 
         addLine(ctx,
                 Bounds.Interpolate.MIN_MIN_MIN,
                 Bounds.Interpolate.MIN_MAX_MIN,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MIN_MIN_MAX,
                 Bounds.Interpolate.MIN_MAX_MAX,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MAX_MIN_MAX,
                 Bounds.Interpolate.MAX_MAX_MAX,
-                r, g, b, a, corners
+                color, corners
         );
         addLine(ctx,
                 Bounds.Interpolate.MAX_MIN_MIN,
                 Bounds.Interpolate.MAX_MAX_MIN,
-                r, g, b, a, corners
+                color, corners
         );
     }
 }

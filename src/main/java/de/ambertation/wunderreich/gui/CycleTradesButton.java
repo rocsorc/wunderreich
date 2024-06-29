@@ -32,10 +32,7 @@ import org.jetbrains.annotations.NotNull;
 public class CycleTradesButton extends Button {
 
     public static final int WIDTH = 18;
-    private static final ResourceLocation ARROW_BUTTON = new ResourceLocation(
-            Wunderreich.MOD_ID,
-            "textures/gui/reroll.png"
-    );
+    private static final ResourceLocation ARROW_BUTTON = Wunderreich.ID("textures/gui/reroll.png");
     private static final int HALF_HEIGHT = 13;
     public static final int HEIGHT = HALF_HEIGHT * 2;
 

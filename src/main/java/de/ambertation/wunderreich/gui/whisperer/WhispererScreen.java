@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 @Environment(value = EnvType.CLIENT)
 public class WhispererScreen
         extends AbstractContainerScreen<WhispererMenu> {
-    private static final ResourceLocation VILLAGER_LOCATION = new ResourceLocation(
+    private static final ResourceLocation VILLAGER_LOCATION = ResourceLocation.withDefaultNamespace(
             "textures/gui/container/villager2.png");
     private static final int TEXTURE_WIDTH = 512;
     private static final int TEXTURE_HEIGHT = 256;
@@ -175,7 +175,7 @@ public class WhispererScreen
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, i, j, f);
         super.render(guiGraphics, i, j, f);
         var enchants = this.menu.getEnchants();
         if (!enchants.isEmpty()) {

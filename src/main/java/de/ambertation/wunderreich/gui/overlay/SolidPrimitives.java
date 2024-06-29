@@ -4,9 +4,9 @@ import de.ambertation.wunderlib.math.Float2;
 import de.ambertation.wunderlib.math.Float3;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.util.FastColor;
 
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 public class SolidPrimitives {
@@ -19,10 +19,7 @@ public class SolidPrimitives {
                 builder,
                 nfo.pos,
                 nfo.deflate,
-                FastColor.ARGB32.red(nfo.color),
-                FastColor.ARGB32.green(nfo.color),
-                FastColor.ARGB32.blue(nfo.color),
-                (int) (nfo.alpha * 0xFF)
+                FastColor.ARGB32.color(nfo.color, (int) (nfo.alpha * 0xFF))
         );
     }
 
@@ -31,17 +28,16 @@ public class SolidPrimitives {
             Float3 pos, float deflate, int color, float alpha
     ) {
         renderSingleBlock(ctx, builder, pos, deflate,
-                FastColor.ARGB32.red(color), FastColor.ARGB32.green(color), FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
     public static void renderSingleBlock(
             RenderContext ctx, BufferBuilder builder,
-            Float3 pos, float deflate, int r, int g, int b, int a
+            Float3 pos, float deflate, int color
     ) {
         Matrix4f m = ctx.pose();
-        Matrix3f rotation = ctx.normal();
+        PoseStack.Pose rotation = ctx.normal();
         float lx = (float) (pos.x + ctx.worldToCamSpace.x) - 0.5f;
         float ly = (float) (pos.y + ctx.worldToCamSpace.y) - 0.5f;
         float lz = (float) (pos.z + ctx.worldToCamSpace.z) - 0.5f;
@@ -51,35 +47,35 @@ public class SolidPrimitives {
         lx += deflate;
         ly += deflate;
         lz += deflate;
-        builder.vertex(m, lx, ly, lz).color(r, g, b, a).normal(rotation, 0, 0, -1).endVertex();
-        builder.vertex(m, lx, hy, lz).color(r, g, b, a).normal(rotation, 0, 0, -1).endVertex();
-        builder.vertex(m, hx, hy, lz).color(r, g, b, a).normal(rotation, 0, 0, -1).endVertex();
-        builder.vertex(m, hx, ly, lz).color(r, g, b, a).normal(rotation, 0, 0, -1).endVertex();
+        builder.addVertex(m, lx, ly, lz).setColor(color).setNormal(rotation, 0, 0, -1);
+        builder.addVertex(m, lx, hy, lz).setColor(color).setNormal(rotation, 0, 0, -1);
+        builder.addVertex(m, hx, hy, lz).setColor(color).setNormal(rotation, 0, 0, -1);
+        builder.addVertex(m, hx, ly, lz).setColor(color).setNormal(rotation, 0, 0, -1);
 
-        builder.vertex(m, lx, ly, hz).color(r, g, b, a).normal(rotation, 0, 0, 1).endVertex();
-        builder.vertex(m, hx, ly, hz).color(r, g, b, a).normal(rotation, 0, 0, 1).endVertex();
-        builder.vertex(m, hx, hy, hz).color(r, g, b, a).normal(rotation, 0, 0, 1).endVertex();
-        builder.vertex(m, lx, hy, hz).color(r, g, b, a).normal(rotation, 0, 0, 1).endVertex();
+        builder.addVertex(m, lx, ly, hz).setColor(color).setNormal(rotation, 0, 0, 1);
+        builder.addVertex(m, hx, ly, hz).setColor(color).setNormal(rotation, 0, 0, 1);
+        builder.addVertex(m, hx, hy, hz).setColor(color).setNormal(rotation, 0, 0, 1);
+        builder.addVertex(m, lx, hy, hz).setColor(color).setNormal(rotation, 0, 0, 1);
 
-        builder.vertex(m, lx, ly, hz).color(r, g, b, a).normal(rotation, 0, -1, 0).endVertex();
-        builder.vertex(m, lx, ly, lz).color(r, g, b, a).normal(rotation, 0, -1, 0).endVertex();
-        builder.vertex(m, hx, ly, lz).color(r, g, b, a).normal(rotation, 0, -1, 0).endVertex();
-        builder.vertex(m, hx, ly, hz).color(r, g, b, a).normal(rotation, 0, -1, 0).endVertex();
+        builder.addVertex(m, lx, ly, hz).setColor(color).setNormal(rotation, 0, -1, 0);
+        builder.addVertex(m, lx, ly, lz).setColor(color).setNormal(rotation, 0, -1, 0);
+        builder.addVertex(m, hx, ly, lz).setColor(color).setNormal(rotation, 0, -1, 0);
+        builder.addVertex(m, hx, ly, hz).setColor(color).setNormal(rotation, 0, -1, 0);
 
-        builder.vertex(m, lx, hy, hz).color(r, g, b, a).normal(rotation, 0, 1, 0).endVertex();
-        builder.vertex(m, hx, hy, hz).color(r, g, b, a).normal(rotation, 0, 1, 0).endVertex();
-        builder.vertex(m, hx, hy, lz).color(r, g, b, a).normal(rotation, 0, 1, 0).endVertex();
-        builder.vertex(m, lx, hy, lz).color(r, g, b, a).normal(rotation, 0, 1, 0).endVertex();
+        builder.addVertex(m, lx, hy, hz).setColor(color).setNormal(rotation, 0, 1, 0);
+        builder.addVertex(m, hx, hy, hz).setColor(color).setNormal(rotation, 0, 1, 0);
+        builder.addVertex(m, hx, hy, lz).setColor(color).setNormal(rotation, 0, 1, 0);
+        builder.addVertex(m, lx, hy, lz).setColor(color).setNormal(rotation, 0, 1, 0);
 
-        builder.vertex(m, lx, ly, hz).color(r, g, b, a).normal(rotation, -1, 0, 0).endVertex();
-        builder.vertex(m, lx, hy, hz).color(r, g, b, a).normal(rotation, -1, 0, 0).endVertex();
-        builder.vertex(m, lx, hy, lz).color(r, g, b, a).normal(rotation, -1, 0, 0).endVertex();
-        builder.vertex(m, lx, ly, lz).color(r, g, b, a).normal(rotation, -1, 0, 0).endVertex();
+        builder.addVertex(m, lx, ly, hz).setColor(color).setNormal(rotation, -1, 0, 0);
+        builder.addVertex(m, lx, hy, hz).setColor(color).setNormal(rotation, -1, 0, 0);
+        builder.addVertex(m, lx, hy, lz).setColor(color).setNormal(rotation, -1, 0, 0);
+        builder.addVertex(m, lx, ly, lz).setColor(color).setNormal(rotation, -1, 0, 0);
 
-        builder.vertex(m, hx, ly, hz).color(r, g, b, a).normal(rotation, 1, 0, 0).endVertex();
-        builder.vertex(m, hx, ly, lz).color(r, g, b, a).normal(rotation, 1, 0, 0).endVertex();
-        builder.vertex(m, hx, hy, lz).color(r, g, b, a).normal(rotation, 1, 0, 0).endVertex();
-        builder.vertex(m, hx, hy, hz).color(r, g, b, a).normal(rotation, 1, 0, 0).endVertex();
+        builder.addVertex(m, hx, ly, hz).setColor(color).setNormal(rotation, 1, 0, 0);
+        builder.addVertex(m, hx, ly, lz).setColor(color).setNormal(rotation, 1, 0, 0);
+        builder.addVertex(m, hx, hy, lz).setColor(color).setNormal(rotation, 1, 0, 0);
+        builder.addVertex(m, hx, hy, hz).setColor(color).setNormal(rotation, 1, 0, 0);
     }
 
     //-------------------------------------- 2D Shapes --------------------------------------
@@ -96,10 +92,7 @@ public class SolidPrimitives {
                 center.add(sz.mul(Float3.mXmZ_PLANE)),
                 center.add(sz.mul(Float3.mXZ_PLANE)),
                 Float3.Y_AXIS,
-                FastColor.ARGB32.red(color),
-                FastColor.ARGB32.green(color),
-                FastColor.ARGB32.blue(color),
-                (int) (alpha * 0xFF)
+                FastColor.ARGB32.color(color, (int) (alpha * 0xFF))
         );
     }
 
@@ -107,7 +100,7 @@ public class SolidPrimitives {
             RenderContext ctx, BufferBuilder builder,
             Float3 p1, Float3 p2, Float3 p3, Float3 p4,
             Float3 normal,
-            int r, int g, int b, int a
+            int color
     ) {
         renderQuadCameraSpace(
                 ctx, builder,
@@ -116,7 +109,7 @@ public class SolidPrimitives {
                 p3.add(ctx.worldToCamSpace),
                 p4.add(ctx.worldToCamSpace),
                 normal,
-                r, g, b, a
+                color
         );
     }
 
@@ -124,26 +117,26 @@ public class SolidPrimitives {
             RenderContext ctx, BufferBuilder builder,
             Float3 p1, Float3 p2, Float3 p3, Float3 p4,
             Float3 normal,
-            int r, int g, int b, int a
+            int color
     ) {
         Matrix4f m = ctx.pose();
-        Matrix3f rotation = ctx.normal();
+        PoseStack.Pose rotation = ctx.normal();
 
-        builder.vertex(m, (float) p1.x, (float) p1.y, (float) p1.z)
-               .color(r, g, b, a)
-               .normal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
-               .endVertex();
-        builder.vertex(m, (float) p2.x, (float) p2.y, (float) p2.z)
-               .color(r, g, b, a)
-               .normal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
-               .endVertex();
-        builder.vertex(m, (float) p3.x, (float) p3.y, (float) p3.z)
-               .color(r, g, b, a)
-               .normal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
-               .endVertex();
-        builder.vertex(m, (float) p4.x, (float) p4.y, (float) p4.z)
-               .color(r, g, b, a)
-               .normal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
-               .endVertex();
+        builder.addVertex(m, (float) p1.x, (float) p1.y, (float) p1.z)
+               .setColor(color)
+               .setNormal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
+        ;
+        builder.addVertex(m, (float) p2.x, (float) p2.y, (float) p2.z)
+               .setColor(color)
+               .setNormal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
+        ;
+        builder.addVertex(m, (float) p3.x, (float) p3.y, (float) p3.z)
+               .setColor(color)
+               .setNormal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
+        ;
+        builder.addVertex(m, (float) p4.x, (float) p4.y, (float) p4.z)
+               .setColor(color)
+               .setNormal(rotation, (float) normal.x, (float) normal.y, (float) normal.z)
+        ;
     }
 }

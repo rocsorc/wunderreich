@@ -87,18 +87,16 @@ final class BlockInfo {
     }
 
     static void drawAll(RenderContext ctx, Tesselator tesselator, List<BlockInfo> positions) {
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+        BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
         for (BlockInfo nfo : positions) {
             SolidPrimitives.renderSingleBlock(ctx, bufferBuilder, nfo);
         }
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.build());
     }
 
     static void drawRefPlane(RenderContext ctx, Tesselator tesselator, Float3 refPlanePosition) {
         if (refPlanePosition != null) {
-            BufferBuilder bufferBuilder = tesselator.getBuilder();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+            BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 
             SolidPrimitives.renderQuadXZ(
                     ctx,
@@ -109,7 +107,7 @@ final class BlockInfo {
                     .2f
             );
 
-            BufferUploader.drawWithShader(bufferBuilder.end());
+            BufferUploader.drawWithShader(bufferBuilder.build());
         }
     }
 }

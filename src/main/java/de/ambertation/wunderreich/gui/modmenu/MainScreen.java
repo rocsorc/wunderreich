@@ -24,11 +24,11 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class MainScreen extends ConfigScreen {
-    static final ResourceLocation ICON_LINE = new ResourceLocation(Wunderreich.MOD_ID, "hline.png");
+    static final ResourceLocation ICON_LINE = Wunderreich.ID("hline.png");
     static final Rectangle ICON_LINE_UV = new Rectangle(0, 0, 94, 15);
-    static final ResourceLocation TEXT_LINE = new ResourceLocation(Wunderreich.MOD_ID, "text.png");
+    static final ResourceLocation TEXT_LINE = Wunderreich.ID("text.png");
     static final Rectangle TEXT_LINE_UV = new Rectangle(0, 0, 376, 57);
-    static final ResourceLocation BOX = new ResourceLocation(Wunderreich.MOD_ID, "box.png");
+    static final ResourceLocation BOX = Wunderreich.ID("box.png");
     static final Rectangle BOX_UV = new Rectangle(0, 0, 400, 440);
 
     public MainScreen(@Nullable Screen parent) {

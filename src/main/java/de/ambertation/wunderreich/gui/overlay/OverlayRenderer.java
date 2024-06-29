@@ -122,7 +122,7 @@ public class OverlayRenderer implements DebugRenderer.SimpleDebugRenderer {
                 TextRenderer.render(ctx, constructionData.CENTER.get(), COLOR_FIERY_ROSE);
                 //LinePrimitives.renderBounds(ctx, sdf.getBoundingBox(), 0.1f, COLOR_BOUNDING_BOX, .25f);
 
-                time += Minecraft.getInstance().getDeltaFrameTime();
+                time += Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
                 if (time > 10000) time -= 10000;
                 double scaledTime = time * 0.02;
                 float phase = (float) (Math.sin(Math.PI * 2 * (scaledTime - Math.floor(scaledTime))) + 1) / 2;
@@ -310,8 +310,9 @@ public class OverlayRenderer implements DebugRenderer.SimpleDebugRenderer {
                             font,
                             Float2.of(8, y),
                             Minecraft.getInstance().getWindow().getWidth() - 16,
-                            Component.literal(InputManager.INSTANCE.getNumberString() + " [" + InputManager.INSTANCE.getDeltaString() + "]")
-                                     .append(Component.translatable("info.wunderreich.transform_" + write)),
+                            Component
+                                    .literal(InputManager.INSTANCE.getNumberString() + " [" + InputManager.INSTANCE.getDeltaString() + "]")
+                                    .append(Component.translatable("info.wunderreich.transform_" + write)),
                             InputManager.INSTANCE.isValidNumberString() ? ColorHelper.YELLOW : ColorHelper.RED
                     );
                 } else {
