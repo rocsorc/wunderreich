@@ -4,8 +4,11 @@ import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.advancements.AdvancementsJsonBuilder;
 import de.ambertation.wunderreich.config.Configs;
 
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -15,6 +18,7 @@ import com.google.gson.JsonElement;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class WunderreichAdvancements {
     public static final Map<ResourceLocation, JsonElement> ADVANCEMENTS = new HashMap<>();
@@ -22,11 +26,19 @@ public class WunderreichAdvancements {
     public static PlayerTrigger OPEN_WUNDERKISTE;
     public static PlayerTrigger COLOR_WUNDERKISTE;
 
+    public static Criterion<PlayerTrigger.TriggerInstance> USE_TROWEL_CRITERION;
+    public static Criterion<PlayerTrigger.TriggerInstance> OPEN_WUNDERKISTE_CRITERION;
+    public static Criterion<PlayerTrigger.TriggerInstance> COLOR_WUNDERKISTE_CRITERION;
 
     public static void register() {
-        USE_TROWEL = CriteriaTriggers.register(new PlayerTrigger(Wunderreich.ID("use_trowel")));
-        OPEN_WUNDERKISTE = CriteriaTriggers.register(new PlayerTrigger(Wunderreich.ID("open_wunderkiste")));
-        COLOR_WUNDERKISTE = CriteriaTriggers.register(new PlayerTrigger(Wunderreich.ID("color_wunderkiste")));
+        USE_TROWEL = register(Wunderreich.ID("use_trowel"), new PlayerTrigger());
+        USE_TROWEL_CRITERION = USE_TROWEL.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+
+        OPEN_WUNDERKISTE = register(Wunderreich.ID("open_wunderkiste"), new PlayerTrigger());
+        OPEN_WUNDERKISTE_CRITERION = OPEN_WUNDERKISTE.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+
+        COLOR_WUNDERKISTE = register(Wunderreich.ID("color_wunderkiste"), new PlayerTrigger());
+        COLOR_WUNDERKISTE_CRITERION = COLOR_WUNDERKISTE.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 
         Item rootItem = CreativeTabs.getBlockIcon().asItem();
         if (rootItem == Blocks.LAPIS_BLOCK.asItem()) rootItem = CreativeTabs.getItemIcon();
@@ -100,5 +112,9 @@ public class WunderreichAdvancements {
                     .startCriteria("color_wunderkiste", COLOR_WUNDERKISTE.getId().toString(), b -> {
                     }).register();
         }
+    }
+
+    public static <T extends CriterionTrigger<?>> T register(ResourceLocation id, T trigger) {
+        return Registry.register(BuiltInRegistries.TRIGGER_TYPES, id, trigger);
     }
 }

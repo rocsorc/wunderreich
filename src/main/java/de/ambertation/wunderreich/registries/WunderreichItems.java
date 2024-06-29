@@ -19,8 +19,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tiers;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -89,9 +87,8 @@ public class WunderreichItems {
     );
 
     @NotNull
-    public static FabricItemSettings makeItemSettings() {
-        //TODO: 1.20 Changed handling of creative Tabs
-        return (FabricItemSettings) new FabricItemSettings();//.tab(CreativeTabs.TAB_ITEMS);
+    public static Item.Properties makeItemSettings() {
+        return new Item.Properties();
     }
 
     public static Collection<Item> getAllItems() {

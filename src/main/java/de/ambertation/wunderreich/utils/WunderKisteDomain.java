@@ -24,22 +24,22 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public enum WunderKisteDomain implements StringRepresentable {
-    WHITE("white", Items.WHITE_DYE, 0xFFFFFF, false, "wunder_kiste"),
-    ORANGE("orange", Items.ORANGE_DYE, 0xF9932B, true),
-    MAGENTA("magenta", Items.MAGENTA_DYE, 0xD660D1, true),
-    LIGHT_BLUE("light_blue", Items.LIGHT_BLUE_DYE, 0x5CB7E7, false),
-    YELLOW("yellow", Items.YELLOW_DYE, 0xFED93F, true),
-    LIME("lime", Items.LIME_DYE, 0x86CC26, true),
-    PINK("pink", Items.PINK_DYE, 0xF4B2C9, true),
-    GRAY("gray", Items.GRAY_DYE, 0x474F52, false),
-    LIGHT_GRAY("light_gray", Items.LIGHT_GRAY_DYE, 0x9D9D97, false),
-    CYAN("cyan", Items.CYAN_DYE, 0x169B9C, true),
-    PURPLE("purple", Items.PURPLE_DYE, 0x9743CD, true),
-    BLUE("blue", Items.BLUE_DYE, 0x2C2F90, false),
-    BROWN("brown", Items.BROWN_DYE, 0x835432, true),
-    GREEN("green", Items.GREEN_DYE, 0x658619, true),
-    RED("red", Items.RED_DYE, 0xB8342C, true),
-    BLACK("black", Items.BLACK_DYE, 0x252529, false);
+    WHITE("white", Items.WHITE_DYE, 0xFFFFFFFF, false, "wunder_kiste"),
+    ORANGE("orange", Items.ORANGE_DYE, 0xFFF9932B, true),
+    MAGENTA("magenta", Items.MAGENTA_DYE, 0xFFD660D1, true),
+    LIGHT_BLUE("light_blue", Items.LIGHT_BLUE_DYE, 0xFF5CB7E7, false),
+    YELLOW("yellow", Items.YELLOW_DYE, 0xFFFED93F, true),
+    LIME("lime", Items.LIME_DYE, 0xFF86CC26, true),
+    PINK("pink", Items.PINK_DYE, 0xFFF4B2C9, true),
+    GRAY("gray", Items.GRAY_DYE, 0xFF474F52, false),
+    LIGHT_GRAY("light_gray", Items.LIGHT_GRAY_DYE, 0xFF9D9D97, false),
+    CYAN("cyan", Items.CYAN_DYE, 0xFF169B9C, true),
+    PURPLE("purple", Items.PURPLE_DYE, 0xFF9743CD, true),
+    BLUE("blue", Items.BLUE_DYE, 0xFF2C2F90, false),
+    BROWN("brown", Items.BROWN_DYE, 0xFF835432, true),
+    GREEN("green", Items.GREEN_DYE, 0xFF658619, true),
+    RED("red", Items.RED_DYE, 0xFFB8342C, true),
+    BLACK("black", Items.BLACK_DYE, 0xFF252529, false);
 
     public final Item triggerItem;
     public final ID domainID;
@@ -59,7 +59,7 @@ public enum WunderKisteDomain implements StringRepresentable {
         this.useMonochromeFallback = useMonochromeFallback;
 
         if (Configs.MAIN.multiTexturedWunderkiste.get()) {
-            overlayColor = 0xFFFFFF;
+            overlayColor = 0xFFFFFFFF;
         } else {
             overlayColor = color;
         }

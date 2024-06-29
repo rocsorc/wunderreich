@@ -7,6 +7,7 @@ import de.ambertation.wunderreich.registries.WunderreichBlocks;
 import de.ambertation.wunderreich.utils.WunderKisteDomain;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -30,18 +31,18 @@ public class WunderKisteBlockEntity extends BlockEntity implements LidBlockEntit
     private Component domainName;
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.loadAdditional(compoundTag, provider);
         if (compoundTag.contains("CustomName", Tag.TAG_STRING)) {
-            this.domainName = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
+            this.domainName = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag) {
-        super.saveAdditional(compoundTag);
+    protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+        super.saveAdditional(compoundTag, provider);
         if (this.domainName != null) {
-            compoundTag.putString("CustomName", Component.Serializer.toJson(this.domainName));
+            compoundTag.putString("CustomName", Component.Serializer.toJson(this.domainName, provider));
         }
     }
 

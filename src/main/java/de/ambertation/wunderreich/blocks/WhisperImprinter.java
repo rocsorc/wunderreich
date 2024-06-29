@@ -16,7 +16,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
@@ -54,13 +53,12 @@ public class WhisperImprinter extends Block implements BlockTagSupplier, ChangeR
     }
 
     @Override
-    public InteractionResult use(
-            @NotNull BlockState blockState,
+    protected InteractionResult useWithoutItem(
+            BlockState blockState,
             Level level,
-            @NotNull BlockPos blockPos,
-            @NotNull Player player,
-            @NotNull InteractionHand interactionHand,
-            @NotNull BlockHitResult blockHitResult
+            BlockPos blockPos,
+            Player player,
+            BlockHitResult blockHitResult
     ) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;

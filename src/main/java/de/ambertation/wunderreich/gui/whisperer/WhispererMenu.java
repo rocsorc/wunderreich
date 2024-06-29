@@ -199,7 +199,7 @@ public class WhispererMenu
         if (!inventory.isEmpty()) {
             for (int j = INV_SLOT_START; j < HOTBAR_SLOT_END; ++j) {
                 final ItemStack slotStack = this.slots.get(j).getItem();
-                if (!slotStack.isEmpty() && ItemStack.isSameItemSameTags(inventory, slotStack)) {
+                if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(inventory, slotStack)) {
                     final ItemStack containerStack = this.container.getItem(containerIndex);
                     final int occupiedCount = containerStack.isEmpty() ? 0 : containerStack.getCount();
                     final int moveCount = Math.min(inventory.getMaxStackSize() - occupiedCount, slotStack.getCount());

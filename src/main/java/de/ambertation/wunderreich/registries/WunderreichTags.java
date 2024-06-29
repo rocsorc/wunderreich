@@ -8,11 +8,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
-import net.fabricmc.fabric.api.mininglevel.v1.FabricMineableTags;
-
 public class WunderreichTags {
     public static final TagKey<Block> MINEABLE_TROWEL = TagRegistry.BLOCK.createCommon("mineable/trowel");
-    public static final TagKey<Block> MINEABLE_SHEARS = FabricMineableTags.SHEARS_MINEABLE;
+    public static final TagKey<Block> MINEABLE_SHEARS = TagRegistry.BLOCK.createCommon("mineable/shears");
 
     static void supplyForBlock(Block bl) {
         if (bl instanceof BlockTagSupplier supl) {

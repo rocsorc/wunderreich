@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class AbstractWallBlock extends net.minecraft.world.level.block.WallBlock implements BlockTagSupplier, CanDropLoot {
 
     public AbstractWallBlock(Block baseBlock) {
-        super(BlockBehaviour.Properties.copy(baseBlock));
+        super(BlockBehaviour.Properties.ofFullCopy(baseBlock));
     }
 
     @Override

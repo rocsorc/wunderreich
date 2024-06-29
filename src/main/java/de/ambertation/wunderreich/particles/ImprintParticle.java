@@ -1,7 +1,7 @@
 package de.ambertation.wunderreich.particles;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.EnchantmentTableParticle;
+import net.minecraft.client.particle.FlyTowardsPositionParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
@@ -11,7 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
-public class ImprintParticle extends EnchantmentTableParticle {
+public class ImprintParticle extends FlyTowardsPositionParticle {
     ImprintParticle(
             ClientLevel clientLevel,
             double x,

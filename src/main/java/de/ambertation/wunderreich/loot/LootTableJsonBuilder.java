@@ -6,6 +6,7 @@ import de.ambertation.wunderreich.interfaces.CanDropLoot;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -34,7 +35,7 @@ public class LootTableJsonBuilder {
     private LootTableJsonBuilder(ResourceLocation sourceID, LootTypes type) {
         this.sourceID = sourceID;
         if (type == LootTypes.BLOCK) {
-            this.ID = new ResourceLocation(sourceID.getNamespace(), "blocks/" + sourceID.getPath());
+            this.ID = ResourceLocation.fromNamespaceAndPath(sourceID.getNamespace(), "blocks/" + sourceID.getPath());
         } else {
             this.ID = sourceID;
         }
@@ -160,11 +161,12 @@ public class LootTableJsonBuilder {
             return this.enchantedTool(Enchantments.SILK_TOUCH, 1);
         }
 
-        public EntryBuilder<P> enchantedTool(Enchantment e, int minLevel) {
-            var id = BuiltInRegistries.ENCHANTMENT.getKey(e);
+        public EntryBuilder<P> enchantedTool(ResourceKey<Enchantment> id, int minLevel) {
             if (id != null) {
                 var predicate = new EnchantmentPredicate();
-                predicate.addEnchantment(new de.ambertation.wunderreich.loot.Enchantment(id.toString(), minLevel));
+                predicate.addEnchantment(new de.ambertation.wunderreich.loot.Enchantment(id
+                        .location()
+                        .toString(), minLevel));
                 entry.addCondition(new MatchToolCondition(predicate));
             } else {
                 Wunderreich.LOGGER.warn("Unknown Enchantment '{}' in Loot Table '{}'", e.toString(), base.ID);

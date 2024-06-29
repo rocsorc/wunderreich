@@ -40,15 +40,10 @@ public class DirtPathSlabBlock extends DirtSlabBlock {
     }
 
     @Override
-    public boolean isPathfindable(
-            BlockState blockState,
-            BlockGetter blockGetter,
-            BlockPos blockPos,
-            PathComputationType pathComputationType
-    ) {
+    protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
         return false;
     }
-
+    
     @Override
     public void tick(BlockState blockState, ServerLevel level, BlockPos blockPos, RandomSource random) {
         if (!Configs.BLOCK_CONFIG.isEnabled(WunderreichSlabBlocks.DIRT_SLAB)) return;

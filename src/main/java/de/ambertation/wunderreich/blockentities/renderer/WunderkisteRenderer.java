@@ -20,7 +20,6 @@ import net.minecraft.client.renderer.blockentity.BrightnessCombiner;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.util.FastColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.ChestBlock;
@@ -117,9 +116,7 @@ public class WunderkisteRenderer extends ChestRenderer<WunderKisteBlockEntity> {
                     openness,
                     uv2,
                     overlayCoords,
-                    FastColor.ARGB32.red(d.overlayColor) / (float) 0XFF,
-                    FastColor.ARGB32.green(d.overlayColor) / (float) 0XFF,
-                    FastColor.ARGB32.blue(d.overlayColor) / (float) 0XFF
+                    d.overlayColor
             );
 
             if (openness > 0) {
@@ -131,9 +128,7 @@ public class WunderkisteRenderer extends ChestRenderer<WunderKisteBlockEntity> {
                         this.bottom,
                         uv2,
                         overlayCoords,
-                        FastColor.ARGB32.red(d.color) / (float) 0XFF,
-                        FastColor.ARGB32.green(d.color) / (float) 0XFF,
-                        FastColor.ARGB32.blue(d.color) / (float) 0XFF
+                        d.color
                 );
             }
             poseStack.popPose();
@@ -149,15 +144,13 @@ public class WunderkisteRenderer extends ChestRenderer<WunderKisteBlockEntity> {
             float f,
             int uv2,
             int overlayCoord,
-            float r,
-            float g,
-            float b
+            int color
     ) {
         lockPart.xRot = lidPart.xRot = -(f * 1.5707964f);
 
-        lidPart.render(poseStack, vertexConsumer, uv2, overlayCoord, r, g, b, 1.0f);
-        lockPart.render(poseStack, vertexConsumer, uv2, overlayCoord, r, g, b, 1.0f);
-        bottomPart.render(poseStack, vertexConsumer, uv2, overlayCoord, r, g, b, 1.0f);
+        lidPart.render(poseStack, vertexConsumer, uv2, overlayCoord, color);
+        lockPart.render(poseStack, vertexConsumer, uv2, overlayCoord, color);
+        bottomPart.render(poseStack, vertexConsumer, uv2, overlayCoord, color);
     }
 
     private void renderAnimTop(
@@ -166,9 +159,7 @@ public class WunderkisteRenderer extends ChestRenderer<WunderKisteBlockEntity> {
             ModelPart bottomPart,
             int uv2,
             int overlayCords,
-            float r,
-            float g,
-            float b
+            int color
     ) {
 
         poseStack.pushPose();
@@ -183,14 +174,11 @@ public class WunderkisteRenderer extends ChestRenderer<WunderKisteBlockEntity> {
         for (Vertex v : TOP_PLANE) {
             Vector4f vector4f = new Vector4f(v.pos.x(), v.pos.y(), v.pos.z(), 1.0f);
             vector4f.mul(pose);
-            vertexConsumer.vertex(
+            vertexConsumer.addVertex(
                     vector4f.x(),
                     vector4f.y(),
                     vector4f.z(),
-                    r,
-                    g,
-                    b,
-                    1.0f,
+                    color,
                     v.u,
                     v.v,
                     overlayCords,

@@ -3,7 +3,6 @@ package de.ambertation.wunderreich.advancements;
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.registries.WunderreichAdvancements;
 
-import net.minecraft.advancements.FrameType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -82,10 +81,10 @@ public class AdvancementsJsonBuilder {
 
     private AdvancementsJsonBuilder reset(ResourceLocation id, AdvancementType type) {
         if (type == AdvancementType.RECIPE_DECORATIONS) {
-            ID = new ResourceLocation(id.getNamespace(), "recipes/decorations/" + id.getPath());
+            ID = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "recipes/decorations/" + id.getPath());
             parent = "minecraft:recipes/root";
         } else if (type == AdvancementType.RECIPE_TOOL) {
-            ID = new ResourceLocation(id.getNamespace(), "recipes/tools/" + id.getPath());
+            ID = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "recipes/tools/" + id.getPath());
             parent = "minecraft:recipes/root";
         } else {
             ID = id;
@@ -303,20 +302,20 @@ public class AdvancementsJsonBuilder {
             return this;
         }
 
-        public DisplayBuilder frame(FrameType type) {
-            return frame(type.getName());
+        public DisplayBuilder frame(net.minecraft.advancements.AdvancementType type) {
+            return frame(type.getSerializedName());
         }
 
         public DisplayBuilder challenge() {
-            return frame(FrameType.CHALLENGE);
+            return frame(net.minecraft.advancements.AdvancementType.CHALLENGE);
         }
 
         public DisplayBuilder task() {
-            return frame(FrameType.TASK);
+            return frame(net.minecraft.advancements.AdvancementType.TASK);
         }
 
         public DisplayBuilder goal() {
-            return frame(FrameType.GOAL);
+            return frame(net.minecraft.advancements.AdvancementType.GOAL);
         }
     }
 }

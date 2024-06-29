@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 public class AbstractStairBlock extends net.minecraft.world.level.block.StairBlock implements BlockTagSupplier, CanDropLoot {
     public AbstractStairBlock(Block baseBlock) {
-        super(baseBlock.defaultBlockState(), BlockBehaviour.Properties.copy(baseBlock));
+        super(baseBlock.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(baseBlock));
     }
 
     @Override

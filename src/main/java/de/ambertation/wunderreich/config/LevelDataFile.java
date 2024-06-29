@@ -5,6 +5,7 @@ import de.ambertation.wunderreich.blocks.WunderKisteBlock;
 
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 
@@ -17,13 +18,13 @@ public class LevelDataFile {
     private static final String OLD_GLOBAL_TAG_NAME = "global";
 
     @NotNull
-    private LevelData levelData;
-    private String baseName;
+    private final LevelData levelData;
+    private final String baseName;
     private boolean didLoad;
     @NotNull
     private CompoundTag root;
 
-    public LevelDataFile(LevelData levelData, String baseName) {
+    public LevelDataFile(@NotNull LevelData levelData, String baseName) {
         root = new CompoundTag();
         this.didLoad = false;
         this.levelData = levelData;
@@ -49,7 +50,7 @@ public class LevelDataFile {
             //reload existing file
             if (dataFile.exists()) {
                 try {
-                    loadedRoot = NbtIo.readCompressed(dataFile);
+                    loadedRoot = NbtIo.readCompressed(dataFile.toPath(), NbtAccounter.create(0x200000L));
                 } catch (IOException e) {
                     Wunderreich.LOGGER.info(
                             "Unable to access level config from '{}'. Trying previous version.",
@@ -58,7 +59,7 @@ public class LevelDataFile {
                     );
                     dataFile = getDataFile("_old");
                     try {
-                        loadedRoot = NbtIo.readCompressed(dataFile);
+                        loadedRoot = NbtIo.readCompressed(dataFile.toPath(), NbtAccounter.create(0x200000L));
                     } catch (IOException ee) {
                         Wunderreich.LOGGER.error("Failed to access level config from '{}'", dataFile.toString(), ee);
                     }
@@ -85,11 +86,11 @@ public class LevelDataFile {
             final File tempFile = getDataFile("_temp");
             root.putString("modify_version", Wunderreich.VERSION.toString());
             try {
-                NbtIo.writeCompressed(root, tempFile);
+                NbtIo.writeCompressed(root, tempFile.toPath());
                 final File dataFile = getDataFile("");
                 final File oldFile = getDataFile("_old");
 
-                Util.safeReplaceFile(dataFile, tempFile, oldFile);
+                Util.safeReplaceFile(dataFile.toPath(), tempFile.toPath(), oldFile.toPath());
             } catch (IOException e) {
                 Wunderreich.LOGGER.error(
                         "Unable to write level config for '{}'.",
