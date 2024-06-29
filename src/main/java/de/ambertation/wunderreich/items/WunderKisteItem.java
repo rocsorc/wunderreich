@@ -7,6 +7,7 @@ import de.ambertation.wunderreich.registries.WunderreichRules;
 import de.ambertation.wunderreich.utils.WunderKisteDomain;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -77,7 +78,7 @@ public class WunderKisteItem extends BlockItem {
         if (WunderreichRules.Wunderkiste.haveMultiple()) {
             final WunderKisteDomain domain = getDomain(itemStack);
 
-            Component domainComponent = WunderreichRules.Wunderkiste.namedNetworks() && itemStack.hasCustomHoverName()
+            Component domainComponent = WunderreichRules.Wunderkiste.namedNetworks() && itemStack.has(DataComponents.CUSTOM_NAME)
                     ? itemStack.getHoverName()
                     : getDomainComponent(domain);
             list.add(Component.translatable("wunderreich.wunderkiste.domain.HoverText", domainComponent).withStyle(

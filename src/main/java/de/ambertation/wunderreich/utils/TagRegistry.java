@@ -5,12 +5,12 @@ import de.ambertation.wunderreich.Wunderreich;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagLoader;
-import net.minecraft.tags.TagManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -54,7 +54,7 @@ public class TagRegistry<T> {
     }
 
     public boolean isForDirectory(String directory) {
-        return TagManager.getTagDir(this.getRegistryKey()).equals(directory);
+        return Registries.tagsDirPath(this.getRegistryKey()).equals(directory);
     }
 
     public ResourceKey<? extends Registry<T>> getRegistryKey() {
@@ -87,6 +87,6 @@ public class TagRegistry<T> {
     }
 
     public TagKey<T> createCommon(String name) {
-        return TagKey.create(getRegistryKey(), new ResourceLocation("c", name));
+        return TagKey.create(getRegistryKey(), ResourceLocation.fromNamespaceAndPath("c", name));
     }
 }

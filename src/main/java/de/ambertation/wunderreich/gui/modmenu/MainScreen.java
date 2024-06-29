@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class MainScreen extends ConfigScreen {
+    static final ResourceLocation ICON = Wunderreich.ID("icon.png");
     static final ResourceLocation ICON_LINE = Wunderreich.ID("hline.png");
     static final Rectangle ICON_LINE_UV = new Rectangle(0, 0, 94, 15);
     static final ResourceLocation TEXT_LINE = Wunderreich.ID("text.png");
@@ -32,7 +33,7 @@ public class MainScreen extends ConfigScreen {
     static final Rectangle BOX_UV = new Rectangle(0, 0, 400, 440);
 
     public MainScreen(@Nullable Screen parent) {
-        super(parent, Component.translatable("title.wunderreich.modmenu.main"), List.of(Configs.MAIN), 3, 2, 10, 7);
+        super(setScreenOnClose(parent), ICON, Component.translatable("title.wunderreich.modmenu.main"), List.of(Configs.MAIN), 3, 2, 10, 7);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class MainScreen extends ConfigScreen {
     }
 
     @Override
-    protected void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
         guiGraphics.fill(0, 0, width, height, ColorHelper.SCREEN_BACKGROUND);
 
         RenderHelper.renderImage(

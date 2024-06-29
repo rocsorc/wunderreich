@@ -273,7 +273,7 @@ public class WhispererScreen
     }
 
     @Override
-    public boolean mouseScrolled(double d, double e, double f) {
+    public boolean mouseScrolled(double d, double e, double f, double g) {
         int i = this.menu.getEnchants().size();
         if (this.canScroll(i)) {
             int j = i - NUMBER_OF_OFFER_BUTTONS;

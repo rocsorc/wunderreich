@@ -5,6 +5,7 @@ import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import dev.emi.emi.api.EmiRegistry;
@@ -24,10 +25,12 @@ public class EMIImprinterRecipe implements EmiRecipe {
     private final List<EmiIngredient> input;
     private final List<EmiStack> output;
 
-    public EMIImprinterRecipe(ImprinterRecipe recipe) {
-        this.id = recipe.getId();
-        this.input = recipe.getIngredients().stream().map(i -> EmiIngredient.of(i)).toList();
-        this.output = List.of(EmiStack.of(recipe.getResultItem(Minecraft.getInstance().level.registryAccess())));
+    public EMIImprinterRecipe(RecipeHolder<ImprinterRecipe> recipe) {
+        this.id = recipe.id();
+        this.input = recipe.value().getIngredients().stream().map(i -> EmiIngredient.of(i)).toList();
+        this.output = List.of(EmiStack.of(recipe
+                .value()
+                .getResultItem(Minecraft.getInstance().level.registryAccess())));
     }
 
     static void addAllRecipes(EmiRegistry emiRegistry, RecipeManager manager) {

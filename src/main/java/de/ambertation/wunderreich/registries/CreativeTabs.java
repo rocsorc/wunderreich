@@ -7,6 +7,7 @@ import de.ambertation.wunderreich.items.TrainedVillagerWhisperer;
 import de.ambertation.wunderreich.items.WunderKisteItem;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -83,7 +84,7 @@ public class CreativeTabs {
                             else
                                 prefix = bl.getClass().getSimpleName();
                         }
-                        if (stack.hasCustomHoverName())
+                        if (stack.has(DataComponents.CUSTOM_NAME))
                             return prefix + stack.getHoverName().getString();
                         else return prefix + stack.getItem().getName(stack).getString();
                     }));
@@ -108,7 +109,7 @@ public class CreativeTabs {
 
                     stacks.sort(Comparator.comparing(stack -> {
                         String prefix = stack.getItem().getClass().getSimpleName();
-                        if (stack.hasCustomHoverName())
+                        if (stack.has(DataComponents.CUSTOM_NAME))
                             return prefix + stack.getHoverName().getString();
                         else return prefix + stack.getItem().getName(stack).getString();
                     }));

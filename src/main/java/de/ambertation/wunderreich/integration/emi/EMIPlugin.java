@@ -7,11 +7,7 @@ import de.ambertation.wunderreich.utils.Logger;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.recipe.EmiRecipe;
@@ -45,7 +41,7 @@ public class EMIPlugin implements dev.emi.emi.api.EmiPlugin {
             RecipeManager manager,
             Logger logger,
             RecipeType<T> recipeType,
-            Function<T, E> createRecipe
+            Function<RecipeHolder<T>, E> createRecipe
     ) {
         addAllRecipes(
                 emiRegistry,
@@ -57,22 +53,24 @@ public class EMIPlugin implements dev.emi.emi.api.EmiPlugin {
         );
     }
 
-    public static <C extends Container, T extends Recipe<C>, E extends EmiRecipe, V> void addAllRecipes(
+    public static <C extends RecipeInput, T extends Recipe<C>, E extends EmiRecipe, V> void addAllRecipes(
             EmiRegistry emiRegistry,
             RecipeManager manager,
             Logger logger,
             RecipeType<T> recipeType,
-            Function<T, List<V>> variantSupplier,
-            BiFunction<T, V, E> createRecipe
+            Function<RecipeHolder<T>, List<V>> variantSupplier,
+            BiFunction<RecipeHolder<T>, V, E> createRecipe
     ) {
-        final List<T> recipes = manager
+        final List<RecipeHolder<T>> recipes = manager
                 .getAllRecipesFor(recipeType)
                 .stream()
-                .sorted(Comparator.comparing(a -> a.getResultItem(Minecraft.getInstance().level.registryAccess())
-                                                   .getDisplayName()
-                                                   .getString()))
+                .sorted(Comparator.comparing(a -> a
+                        .value()
+                        .getResultItem(Minecraft.getInstance().level.registryAccess())
+                        .getDisplayName()
+                        .getString()))
                 .toList();
-        for (T recipe : recipes) {
+        for (RecipeHolder<T> recipe : recipes) {
             List<V> variants = variantSupplier.apply(recipe);
             if (variants == null) {
                 emiRegistry.addRecipe(createRecipe.apply(recipe, null));
@@ -81,7 +79,7 @@ public class EMIPlugin implements dev.emi.emi.api.EmiPlugin {
                     try {
                         emiRegistry.addRecipe(createRecipe.apply(recipe, variantData));
                     } catch (Exception e) {
-                        logger.error("Exception when parsing vanilla recipe " + recipe.getId(), e);
+                        logger.error("Exception when parsing vanilla recipe " + recipe.id(), e);
                     }
                 }
             }

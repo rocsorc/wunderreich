@@ -6,7 +6,9 @@ import de.ambertation.wunderreich.registries.WunderreichSlabBlocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.context.UseOnContext;
@@ -49,7 +51,9 @@ public class ShovelItemMixin {
                     if (player != null) {
                         useOnContext
                                 .getItemInHand()
-                                .hurtAndBreak(1, player, p -> p.broadcastBreakEvent(useOnContext.getHand()));
+                                .hurtAndBreak(1, player, useOnContext.getHand() == InteractionHand.MAIN_HAND
+                                        ? EquipmentSlot.MAINHAND
+                                        : EquipmentSlot.OFFHAND);
                     }
                 }
 

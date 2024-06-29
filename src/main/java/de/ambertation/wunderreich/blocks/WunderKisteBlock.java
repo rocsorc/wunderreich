@@ -13,9 +13,11 @@ import de.ambertation.wunderreich.utils.LiveBlockManager;
 import de.ambertation.wunderreich.utils.WunderKisteDomain;
 import de.ambertation.wunderreich.utils.WunderKisteServerExtension;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -69,6 +71,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity> implements WorldlyContainerHolder, BlockTagSupplier, BlockEntityProvider<WunderKisteBlockEntity>, CanDropLoot {
+    public static final MapCodec<WunderKisteBlock> CODEC = simpleCodec(properties -> new WunderKisteBlock());
     public static final EnumProperty<WunderKisteDomain> DOMAIN;
     public static final WunderKisteDomain DEFAULT_DOMAIN;
 
@@ -281,13 +284,14 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
     }
 
     @Override
-    public InteractionResult use(
-            @NotNull BlockState blockState,
-            @NotNull Level level,
-            @NotNull BlockPos blockPos,
-            @NotNull Player player,
-            @NotNull InteractionHand interactionHand,
-            @NotNull BlockHitResult blockHitResult
+    protected @NotNull ItemInteractionResult useItemOn(
+            ItemStack itemStack,
+            BlockState blockState,
+            Level level,
+            BlockPos blockPos,
+            Player player,
+            InteractionHand interactionHand,
+            BlockHitResult blockHitResult
     ) {
         BlockEntity entity = level.getBlockEntity(blockPos);
         final WunderKisteContainer wunderKisteContainer = getContainer(blockState, entity, level);
@@ -326,17 +330,17 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
                     if (player instanceof ServerPlayer sp) {
                         WunderreichAdvancements.COLOR_WUNDERKISTE.trigger(sp);
                     }
-                    return InteractionResult.sidedSuccess(level.isClientSide);
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide);
                 } else {
-                    return InteractionResult.PASS;
+                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 }
             } else {
                 BlockPos blockPos2 = blockPos.above();
                 if (level.getBlockState(blockPos2)
                          .isRedstoneConductor(level, blockPos2)) {
-                    return InteractionResult.sidedSuccess(level.isClientSide);
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide);
                 } else if (level.isClientSide) {
-                    return InteractionResult.SUCCESS;
+                    return ItemInteractionResult.SUCCESS;
                 } else {
                     WunderKisteBlockEntity wunderKisteBlockEntity = (WunderKisteBlockEntity) entity;
 
@@ -367,11 +371,11 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
                     }
 
                     PiglinAi.angerNearbyPiglins(player, true);
-                    return InteractionResult.CONSUME;
+                    return ItemInteractionResult.CONSUME;
                 }
             }
         } else {
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
     }
 
@@ -522,7 +526,7 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
             if (stack.getItem() instanceof WunderKisteItem item) {
                 stack = WunderKisteItem.setDomain(stack, WunderKisteServerExtension.getDomain(blockState));
                 if (entity instanceof WunderKisteBlockEntity wentity && wentity.hasCustomName()) {
-                    stack.setHoverName(wentity.getCustomName());
+                    stack.set(DataComponents.CUSTOM_NAME, wentity.getCustomName());
                 }
             }
             return stack;
@@ -537,35 +541,9 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
             LivingEntity livingEntity,
             ItemStack itemStack
     ) {
-        if (itemStack.hasCustomHoverName() && level.getBlockEntity(blockPos) instanceof WunderKisteBlockEntity entity) {
+        if (itemStack.has(DataComponents.CUSTOM_NAME) && level.getBlockEntity(blockPos) instanceof WunderKisteBlockEntity entity) {
             entity.setDomainName(itemStack.getHoverName());
         }
-    }
-
-    @Override
-    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-//        BlockEntity blockEntity = level.getBlockEntity(blockPos);
-//        if (blockEntity instanceof WunderKisteBlockEntity entity) {
-//            if (!level.isClientSide && player.isCreative()) {
-//                ItemStack itemStack = WunderKisteServerExtension.getDomain(blockState).createStack();
-//                blockEntity.saveToItem(itemStack);
-//                if (entity.hasCustomName()) {
-//                    itemStack.setHoverName(entity.getCustomName());
-//                }
-//                ItemEntity itemEntity = new ItemEntity(
-//                        level,
-//                        (double) blockPos.getX() + 0.5,
-//                        (double) blockPos.getY() + 0.5,
-//                        (double) blockPos.getZ() + 0.5,
-//                        itemStack
-//                );
-//                itemEntity.setDefaultPickUpDelay();
-//                level.addFreshEntity(itemEntity);
-//            } else {
-//                //entity.unpackLootTable(player);
-//            }
-//        }
-        super.playerWillDestroy(level, blockPos, blockState, player);
     }
 
     @Override
@@ -585,6 +563,11 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
                                                      );
 
         return b;
+    }
+
+    @Override
+    protected MapCodec<? extends AbstractChestBlock<WunderKisteBlockEntity>> codec() {
+        return CODEC;
     }
 }
 

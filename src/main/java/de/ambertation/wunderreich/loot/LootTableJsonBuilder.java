@@ -169,7 +169,9 @@ public class LootTableJsonBuilder {
                         .toString(), minLevel));
                 entry.addCondition(new MatchToolCondition(predicate));
             } else {
-                Wunderreich.LOGGER.warn("Unknown Enchantment '{}' in Loot Table '{}'", e.toString(), base.ID);
+                Wunderreich.LOGGER.warn("Unknown Enchantment '{}' in Loot Table '{}'", id
+                        .location()
+                        .toString(), base.ID);
             }
             return this;
         }
