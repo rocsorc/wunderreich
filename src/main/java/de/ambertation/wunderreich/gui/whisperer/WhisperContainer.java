@@ -7,10 +7,24 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 import org.jetbrains.annotations.Nullable;
 
 public class WhisperContainer implements Container {
+    public class Input implements RecipeInput {
+
+        @Override
+        public ItemStack getItem(int i) {
+            return WhisperContainer.this.getItem(i);
+        }
+
+        @Override
+        public int size() {
+            return getContainerSize();
+        }
+    }
+
     private final NonNullList<ItemStack> itemStacks;
     private int lastSelectedRule;
     @Nullable

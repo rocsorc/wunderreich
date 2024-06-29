@@ -9,9 +9,9 @@ import de.ambertation.wunderreich.registries.WunderreichBlocks;
 import de.ambertation.wunderreich.registries.WunderreichRecipes;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +36,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
-public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContainer> {
+public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContainer.Input> {
     public static final int COST_A_SLOT = 0;
     public static final int COST_B_SLOT = 1;
     private static final List<ImprinterRecipe> RECIPES = new LinkedList<>();
@@ -135,15 +135,16 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         return NonNullList.of(Ingredient.EMPTY, inputA, inputB);
     }
 
+
     @Override
-    public boolean matches(WhisperContainer inv, Level level) {
-        if (inv.getContainerSize() < 2) return false;
+    public boolean matches(WhisperContainer.Input inv, Level level) {
+        if (inv.size() < 2) return false;
         return this.inputA.test(inv.getItem(COST_A_SLOT)) && this.inputB.test(inv.getItem(COST_B_SLOT)) ||
                 this.inputA.test(inv.getItem(COST_B_SLOT)) && this.inputB.test(inv.getItem(COST_A_SLOT));
     }
 
     @Override
-    public ItemStack assemble(WhisperContainer container, RegistryAccess registryAccess) {
+    public ItemStack assemble(WhisperContainer.Input recipeInput, HolderLookup.Provider provider) {
         return this.output.copy();
     }
 
@@ -154,22 +155,18 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess registryAccess) {
+    public @NotNull ItemStack getResultItem(HolderLookup.Provider registryAccess) {
         return this.output;
     }
 
-    @Override
-    public ResourceLocation getId() {
-        return this.id;
-    }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public @NotNull RecipeSerializer<?> getSerializer() {
         return Serializer.INSTANCE;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public @NotNull RecipeType<?> getType() {
         return Type.INSTANCE;
     }
 

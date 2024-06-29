@@ -22,6 +22,11 @@ import java.util.Optional;
 
 public class WunderreichAdvancements {
     public static final Map<ResourceLocation, JsonElement> ADVANCEMENTS = new HashMap<>();
+
+    public static final ResourceLocation USE_TROWEL_ID = Wunderreich.ID("use_trowel");
+    public static final ResourceLocation OPEN_WUNDERKISTE_ID = Wunderreich.ID("open_wunderkiste");
+    public static final ResourceLocation COLOR_WUNDERKISTE_ID = Wunderreich.ID("color_wunderkiste");
+
     public static PlayerTrigger USE_TROWEL;
     public static PlayerTrigger OPEN_WUNDERKISTE;
     public static PlayerTrigger COLOR_WUNDERKISTE;
@@ -31,13 +36,13 @@ public class WunderreichAdvancements {
     public static Criterion<PlayerTrigger.TriggerInstance> COLOR_WUNDERKISTE_CRITERION;
 
     public static void register() {
-        USE_TROWEL = register(Wunderreich.ID("use_trowel"), new PlayerTrigger());
+        USE_TROWEL = register(USE_TROWEL_ID, new PlayerTrigger());
         USE_TROWEL_CRITERION = USE_TROWEL.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 
-        OPEN_WUNDERKISTE = register(Wunderreich.ID("open_wunderkiste"), new PlayerTrigger());
+        OPEN_WUNDERKISTE = register(OPEN_WUNDERKISTE_ID, new PlayerTrigger());
         OPEN_WUNDERKISTE_CRITERION = OPEN_WUNDERKISTE.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 
-        COLOR_WUNDERKISTE = register(Wunderreich.ID("color_wunderkiste"), new PlayerTrigger());
+        COLOR_WUNDERKISTE = register(COLOR_WUNDERKISTE_ID, new PlayerTrigger());
         COLOR_WUNDERKISTE_CRITERION = COLOR_WUNDERKISTE.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 
         Item rootItem = CreativeTabs.getBlockIcon().asItem();
@@ -86,7 +91,7 @@ public class WunderreichAdvancements {
                     .create("used_trowel")
                     .startDisplay(WunderreichItems.BUILDERS_TROWEL, b -> b.showToast().visible().announceToChat())
                     .parent(root)
-                    .startCriteria("use_trowel", USE_TROWEL.getId().toString(), b -> {
+                    .startCriteria("use_trowel", USE_TROWEL_ID.toString(), b -> {
                     }).register();
         }
 
@@ -99,7 +104,7 @@ public class WunderreichAdvancements {
                             b -> b.showToast().visible().announceToChat()
                     )
                     .parent(root)
-                    .startCriteria("open_wunderkiste", OPEN_WUNDERKISTE.getId().toString(), b -> {
+                    .startCriteria("open_wunderkiste", OPEN_WUNDERKISTE_ID.toString(), b -> {
                     }).register();
 
             ResourceLocation colored_wunderkiste = AdvancementsJsonBuilder
@@ -109,7 +114,7 @@ public class WunderreichAdvancements {
                             b -> b.showToast().visible().announceToChat().goal()
                     )
                     .parent(opened_wunderkiste)
-                    .startCriteria("color_wunderkiste", COLOR_WUNDERKISTE.getId().toString(), b -> {
+                    .startCriteria("color_wunderkiste", COLOR_WUNDERKISTE_ID.toString(), b -> {
                     }).register();
         }
     }
