@@ -281,3 +281,15 @@ task nextVersion() {
         propertiesFile.text = newContents
     }
 }
+
+allprojects {
+    // Allow 400 errors.
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xmaxerrs" << "5000"
+            //<< "-Xlint:rawtypes"
+            //<< "-Xlint:unchecked"
+            //<< "-Xlint:deprecation"
+        }
+    }
+}
