@@ -69,9 +69,8 @@ public class WunderKisteContainer extends SimpleContainer implements WorldlyCont
             if (!itemStack.isEmpty()) {
                 CompoundTag compoundTag = new CompoundTag();
                 compoundTag.putByte("Slot", (byte) i);
-                //TODO: Check if this works...
-                itemStack.save(provider, compoundTag);
-                listTag.add(compoundTag);
+                var t = itemStack.save(provider, compoundTag);
+                listTag.add(t);
             }
         }
 

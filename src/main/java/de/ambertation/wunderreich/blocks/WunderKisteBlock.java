@@ -205,15 +205,14 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
+    @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         FluidState fluidState = blockPlaceContext.getLevel()
                                                  .getFluidState(blockPlaceContext.getClickedPos());
         return this.defaultBlockState()
-                   .setValue(FACING, blockPlaceContext.getHorizontalDirection()
-                                                      .getOpposite()).setValue(
-                        WATERLOGGED,
-                        fluidState.getType() == Fluids.WATER
-                );
+                   .setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite())
+                   .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER)
+                   .setValue(DOMAIN, WunderKisteItem.getDomain(blockPlaceContext.getItemInHand()));
     }
 
     public BlockState rotate(BlockState blockState, Rotation rotation) {
