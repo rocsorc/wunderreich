@@ -2,18 +2,23 @@ package de.ambertation.wunderreich.recipes;
 
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.config.Configs;
-import de.ambertation.wunderreich.gui.whisperer.EnchantmentInfo;
 import de.ambertation.wunderreich.gui.whisperer.WhisperContainer;
 import de.ambertation.wunderreich.gui.whisperer.WhisperRule;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
 import de.ambertation.wunderreich.registries.WunderreichRecipes;
 import de.ambertation.wunderreich.registries.WunderreichRules;
+import de.ambertation.wunderreich.utils.ItemUtil;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -21,13 +26,10 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import com.google.gson.*;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -45,7 +47,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
 
     private ImprinterRecipe(
             ResourceLocation id,
-            Enchantment enchantment,
+            Holder<Enchantment> enchantment,
             Ingredient inputA,
             Ingredient inputB,
             int baseXP
@@ -56,7 +58,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
 
     private ImprinterRecipe(
             ResourceLocation id,
-            Enchantment enchantment,
+            Holder<Enchantment> enchantment,
             Ingredient inputA,
             Ingredient inputB,
             ItemStack output,
@@ -67,15 +69,15 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         this.id = id;
     }
 
-    private ImprinterRecipe(Enchantment e) {
+    private ImprinterRecipe(Holder<Enchantment> e) {
         super(e);
 
         this.id = makeID(e);
     }
 
     @NotNull
-    private static ResourceLocation makeID(Enchantment e) {
-        return Wunderreich.ID(Type.ID.getPath() + "/" + e.getDescriptionId());
+    private static ResourceLocation makeID(Holder<Enchantment> e) {
+        return Wunderreich.ID(Type.ID.getPath() + "/" + e.unwrapKey().orElseThrow().location().getPath());
     }
 
     public static List<ImprinterRecipe> getRecipes() {
@@ -103,7 +105,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         RECIPES.clear();
 
         if (WunderreichRules.Whispers.allowLibrarianSelection()) {
-            List<Enchantment> enchants = new LinkedList<>();
+            List<Holder<Enchantment>> enchants = new LinkedList<>();
             BuiltInRegistries.ENCHANTMENT
                     .stream()
                     .filter(e -> e.isTradeable())
@@ -197,120 +199,52 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     }
 
     private static class Serializer implements RecipeSerializer<ImprinterRecipe> {
+        public static final MapCodec<ImprinterRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("id").forGetter(r -> r.id),
+                Enchantment.CODEC.fieldOf("enchantment").forGetter(r -> r.enchantment),
+                ItemUtil.CODEC_INGREDIENT_WITH_NBT.fieldOf("inputA").forGetter(r -> r.inputA),
+                ItemUtil.CODEC_INGREDIENT_WITH_NBT.fieldOf("inputB").forGetter(r -> r.inputB),
+                ItemUtil.CODEC_ITEM_STACK_WITH_NBT.fieldOf("output").forGetter(r -> r.output),
+                Codec.INT.fieldOf("baseXP").forGetter(r -> r.baseXP),
+                ItemStack.CODEC.fieldOf("type").forGetter(r -> r.type)
+        ).apply(instance, ImprinterRecipe::new));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ImprinterRecipe> STREAM_CODEC = StreamCodec.of(ImprinterRecipe.Serializer::toNetwork, ImprinterRecipe.Serializer::fromNetwork);
+
         public final static ResourceLocation ID = Type.ID;
         public final static Serializer INSTANCE = new Serializer(); //Registry.register(Registry.RECIPE_SERIALIZER, Wunderreich.makeID(Type.ID), new Serializer());
 
         @Override
-        public ImprinterRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf packetBuffer) {
-            Ingredient costA = Ingredient.fromNetwork(packetBuffer);
-            int count = packetBuffer.readByte();
-            if (costA.getItems().length > 0 && count > 0) {
-                ItemStack stack = new ItemStack(costA.getItems()[0].getItem(), count);
-                costA = Ingredient.of(stack);
-            }
-            Ingredient costB = Ingredient.fromNetwork(packetBuffer);
-            ItemStack output = packetBuffer.readItem();
-            /*byte packetType = */
-            packetBuffer.readByte(); //this is a type we currently do not use
-            ItemStack type = packetBuffer.readItem();
+        public @NotNull MapCodec<ImprinterRecipe> codec() {
+            return CODEC;
+        }
+
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, ImprinterRecipe> streamCodec() {
+            return STREAM_CODEC;
+        }
+
+        public static @NotNull ImprinterRecipe fromNetwork(RegistryFriendlyByteBuf packetBuffer) {
+            ResourceLocation id = packetBuffer.readResourceLocation();
+            Holder<Enchantment> e = Enchantment.STREAM_CODEC.decode(packetBuffer);
+            Ingredient inputA = Ingredient.CONTENTS_STREAM_CODEC.decode(packetBuffer);
+            Ingredient inputB = Ingredient.CONTENTS_STREAM_CODEC.decode(packetBuffer);
+            ItemStack output = ItemStack.STREAM_CODEC.decode(packetBuffer);
             int baseXP = packetBuffer.readVarInt();
+            ItemStack type = ItemStack.STREAM_CODEC.decode(packetBuffer);
 
-            ResourceLocation eID = packetBuffer.readResourceLocation();
-            var enchantment = BuiltInRegistries.ENCHANTMENT.getOptional(eID);
-
-            return new ImprinterRecipe(
-                    id,
-                    enchantment.orElseThrow(() -> new RuntimeException("Unknown Enchantment " + eID)),
-                    costA,
-                    costB,
-                    output,
-                    baseXP,
-                    type
-            );
+            return new ImprinterRecipe(id, e, inputA, inputB, output, baseXP, type);
         }
 
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, ImprinterRecipe recipe) {
-            recipe.inputA.toNetwork(buf);
-            buf.writeByte(recipe.inputA.getItems().length == 0 ? 0 : recipe.inputA.getItems()[0].getCount());
-            recipe.inputB.toNetwork(buf);
-            buf.writeItem(recipe.output);
-            buf.writeByte(0); //this is a type we currently do not use
-            buf.writeItem(recipe.type);
-            buf.writeVarInt(recipe.baseXP);
-            buf.writeResourceLocation(EnchantmentHelper.getEnchantmentId(recipe.enchantment));
-        }
 
-        public JsonElement toJson(ImprinterRecipe r) {
-            ImprinterRecipeJsonFormat recipeJson = new ImprinterRecipeJsonFormat();
-            recipeJson.enchantment = BuiltInRegistries.ENCHANTMENT.getKey(r.enchantment).toString();
-            recipeJson.xp = r.baseXP;
-            recipeJson.inputA = r.inputA.toJson();
-            recipeJson.count = r.inputA.getItems().length == 0 ? 0 : r.inputA.getItems()[0].getCount();
-            recipeJson.inputB = r.inputB.toJson();
-            recipeJson.type = Type.ID.toString();
-
-            JsonObject root = new JsonObject();
-            root.add("type", new JsonPrimitive(recipeJson.type));
-            root.add("enchantment", new JsonPrimitive(recipeJson.enchantment));
-            root.add("xp", new JsonPrimitive(recipeJson.xp));
-            root.add("inputA", recipeJson.inputA);
-            root.add("count", new JsonPrimitive(recipeJson.count));
-            root.add("inputB", recipeJson.inputB);
-
-            return root;
-        }
-
-        @Override
-        public ImprinterRecipe fromJson(ResourceLocation id, JsonObject json) {
-            ImprinterRecipeJsonFormat recipeJson = new Gson().fromJson(json, ImprinterRecipeJsonFormat.class);
-
-            if (recipeJson.inputA == null) {
-                throw new JsonSyntaxException("The Attribute 'inputA' is missing.");
-            }
-            if (recipeJson.inputB == null) {
-                throw new JsonSyntaxException("The Attribute 'inputB' is missing.");
-            }
-            if (recipeJson.enchantment == null) {
-                throw new JsonSyntaxException("The Attribute 'output' is missing.");
-            }
-
-            ResourceLocation eID = new ResourceLocation(recipeJson.enchantment);
-            var enchantment = BuiltInRegistries.ENCHANTMENT.getOptional(eID);
-            if (!enchantment.isPresent()) {
-                throw new JsonParseException("Unknown Enchantment " + eID);
-            }
-
-
-            Ingredient inputA = Ingredient.fromJson(recipeJson.inputA);
-            if (inputA.getItems().length > 0 && recipeJson.count > 0) {
-                ItemStack stack = new ItemStack(inputA.getItems()[0].getItem(), recipeJson.count);
-                inputA = Ingredient.of(stack);
-            }
-            Ingredient inputB = Ingredient.fromJson(recipeJson.inputB);
-
-            if (recipeJson.xp <= 0) {
-                EnchantmentInfo ei = new EnchantmentInfo(enchantment.get());
-                recipeJson.xp = ei.baseXP;
-            }
-
-
-            ImprinterRecipe r = new ImprinterRecipe(id, enchantment.get(), inputA, inputB, recipeJson.xp);
-
-            RECIPES.remove(r);
-            RECIPES.add(r);
-            resortRecipes();
-
-            return r;
-        }
-
-        static class ImprinterRecipeJsonFormat {
-            String type;
-            JsonElement inputA;
-            int count;
-            JsonElement inputB;
-            int xp;
-            String enchantment;
+        public static void toNetwork(RegistryFriendlyByteBuf packetBuffer, ImprinterRecipe recipe) {
+            packetBuffer.writeResourceLocation(recipe.id);
+            Enchantment.STREAM_CODEC.encode(packetBuffer, recipe.enchantment);
+            Ingredient.CONTENTS_STREAM_CODEC.encode(packetBuffer, recipe.inputA);
+            Ingredient.CONTENTS_STREAM_CODEC.encode(packetBuffer, recipe.inputB);
+            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.output);
+            packetBuffer.writeVarInt(recipe.baseXP);
+            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.type);
         }
     }
 }
