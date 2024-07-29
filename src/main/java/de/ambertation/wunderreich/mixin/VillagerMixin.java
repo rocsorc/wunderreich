@@ -6,6 +6,7 @@ import de.ambertation.wunderreich.network.CycleTradesMessage;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Villager.class, priority = 100)
 public class VillagerMixin {
+
     protected void wunderreich_updateTradesProxy() {
         Villager self = (Villager) (Object) this;
         AbstractVillagerAccessor acc = (AbstractVillagerAccessor) this;
@@ -28,7 +30,16 @@ public class VillagerMixin {
             //TODO: [MC Update] Check for changes in base Method
             //-------------------------------------
             VillagerData villagerData = self.getVillagerData();
-            Int2ObjectMap<VillagerTrades.ItemListing[]> int2ObjectMap = VillagerTrades.TRADES.get(villagerData.getProfession());
+            Int2ObjectMap<VillagerTrades.ItemListing[]> int2ObjectMap;
+            if (self.level().enabledFeatures().contains(FeatureFlags.TRADE_REBALANCE)) {
+                Int2ObjectMap<VillagerTrades.ItemListing[]> int2ObjectMap2 = VillagerTrades.EXPERIMENTAL_TRADES
+                        .get(villagerData.getProfession());
+                int2ObjectMap = int2ObjectMap2 != null
+                        ? int2ObjectMap2
+                        : VillagerTrades.TRADES.get(villagerData.getProfession());
+            } else {
+                int2ObjectMap = VillagerTrades.TRADES.get(villagerData.getProfession());
+            }
             if (int2ObjectMap == null || int2ObjectMap.isEmpty()) {
                 return;
             }

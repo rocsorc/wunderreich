@@ -11,6 +11,7 @@ import de.ambertation.wunderreich.registries.WunderreichItems;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -151,7 +152,7 @@ public class CycleTradesMessage extends ServerBoundNetworkPayload<CycleTradesMes
         for (MerchantOffer offer : offers) {
             if (offer.getResult().is(Items.ENCHANTED_BOOK)) {
                 final ItemStack results = offer.getResult();
-                var enchantments = results.getEnchantments();
+                var enchantments = results.get(DataComponents.STORED_ENCHANTMENTS);
                 if (!enchantments.isEmpty()) {
                     for (var enc : enchantments.entrySet()) {
                         final Holder<Enchantment> type = enc.getKey();
@@ -203,24 +204,12 @@ public class CycleTradesMessage extends ServerBoundNetworkPayload<CycleTradesMes
                 if (whisp == null) return;
                 whisp.stack().hurtAndBreak(
                         1,
-                        player,
+                        whisp.player(),
                         whisp.slot()
                 );
             }
 
             villager.setOffers(null);
-
-
-//		for (MerchantOffer merchantoffer : villager.getOffers()) {
-//			merchantoffer.resetSpecialPriceDiff();
-//		}
-//
-//		int i = villager.getPlayerReputation(Minecraft.getInstance().player);
-//		if (i != 0) {
-//			for (MerchantOffer merchantoffer : villager.getOffers()) {
-//				merchantoffer.addToSpecialPriceDiff((int)(-Math.floor((float) i * merchantoffer.getPriceMultiplier())));
-//			}
-//		}
 
             player.sendMerchantOffers(
                     menu.containerId,

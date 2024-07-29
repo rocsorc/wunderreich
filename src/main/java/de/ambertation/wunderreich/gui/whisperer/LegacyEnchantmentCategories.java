@@ -35,8 +35,13 @@ public enum LegacyEnchantmentCategories {
         if (hasSlot(d, EquipmentSlotGroup.HEAD)) return ARMOR_HEAD;
         if (hasSlot(d, EquipmentSlotGroup.FEET)) return ARMOR_FEET;
         if (hasSlot(d, EquipmentSlotGroup.LEGS)) return ARMOR_LEGS;
-        if (e.canEnchant(new ItemStack(Items.IRON_BOOTS))) return ARMOR_FEET;
+        if (e.canEnchant(new ItemStack(Items.IRON_BOOTS)) &&
+                e.canEnchant(new ItemStack(Items.IRON_LEGGINGS)) &&
+                e.canEnchant(new ItemStack(Items.IRON_CHESTPLATE)) &&
+                e.canEnchant(new ItemStack(Items.IRON_HELMET))) return ARMOR;
+
         if (e.canEnchant(new ItemStack(Items.IRON_LEGGINGS))) return ARMOR_LEGS;
+        if (e.canEnchant(new ItemStack(Items.IRON_BOOTS))) return ARMOR_FEET;
         if (e.canEnchant(new ItemStack(Items.IRON_SWORD))) return WEAPON;
         if (e.canEnchant(new ItemStack(Items.IRON_PICKAXE))) return DIGGER;
         if (e.canEnchant(new ItemStack(Items.TRIDENT))) return TRIDENT;

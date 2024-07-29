@@ -3,18 +3,18 @@
  */
 package de.ambertation.wunderreich.gui;
 
-import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.network.CycleTradesMessage;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MerchantMenu;
@@ -28,12 +28,14 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 public class CycleTradesButton extends Button {
+    private static final ResourceLocation PAGE_FORWARD_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("widget/page_forward_highlighted");
+    private static final ResourceLocation PAGE_FORWARD_SPRITE = ResourceLocation.withDefaultNamespace("widget/page_forward");
 
-    public static final int WIDTH = 18;
-    private static final ResourceLocation ARROW_BUTTON = Wunderreich.ID("textures/gui/reroll.png");
+    public static final int WIDTH = 23;
     private static final int HALF_HEIGHT = 13;
     public static final int HEIGHT = HALF_HEIGHT * 2;
 
@@ -78,23 +80,17 @@ public class CycleTradesButton extends Button {
         visible = canUse && screen.getMenu().showProgressBar() && screen.getMenu().getTraderXp() <= 0;
 
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-        final int u = isHovered ? 26 : 3;
+        ResourceLocation arrowLocation = (this.isHovered()
+                ? PAGE_FORWARD_HIGHLIGHTED_SPRITE
+                : PAGE_FORWARD_SPRITE);
 
-        guiGraphics.blit(
-                BookViewScreen.BOOK_LOCATION,
-                getX(),
-                getY() + HALF_HEIGHT - 5,
-                u,
-                204,
-                WIDTH,
-                HALF_HEIGHT,
-                256,
-                256
-        );
+        guiGraphics.blitSprite(arrowLocation, this.getX(), getY() + HALF_HEIGHT - 3, 23, 13);
+
         guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(1, -1, 1);
-        guiGraphics.blit(BookViewScreen.BOOK_LOCATION, getX(), -getY(), u, 204, WIDTH, -HALF_HEIGHT, 256, 256);
+        guiGraphics.pose().rotateAround(Axis.ZP.rotationDegrees(180), getX(), getY(), 0);
+        guiGraphics.blitSprite(arrowLocation, getX() - WIDTH, getY() - HALF_HEIGHT, 23, 13);
         guiGraphics.pose().popPose();
+
 
         if (isHovered) {
             List<Component> components = new ArrayList<>(2);
@@ -103,7 +99,7 @@ public class CycleTradesButton extends Button {
             for (MerchantOffer offer : offers) {
                 if (offer.getResult().is(Items.ENCHANTED_BOOK)) {
                     final var result = offer.getResult();
-                    final ItemEnchantments enchantments = result.getEnchantments();
+                    final ItemEnchantments enchantments = result.get(DataComponents.STORED_ENCHANTMENTS);
 
                     for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
                         final Holder<Enchantment> e = entry.getKey();
@@ -113,9 +109,7 @@ public class CycleTradesButton extends Button {
                 }
             }
 
-
-            //TODO: 1.20 check what is missing now
-            //screen.renderTooltip(guiGraphics, components, Optional.empty(), mouseX, mouseY);
+            guiGraphics.renderTooltip(Minecraft.getInstance().font, components, Optional.empty(), mouseX, mouseY);
         }
 
 
