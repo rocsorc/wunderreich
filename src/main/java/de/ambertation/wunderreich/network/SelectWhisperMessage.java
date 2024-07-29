@@ -1,5 +1,8 @@
 package de.ambertation.wunderreich.network;
 
+import de.ambertation.wunderlib.network.ServerBoundNetworkPayload;
+import de.ambertation.wunderlib.network.ServerBoundPacketHandler;
+import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.gui.whisperer.WhispererMenu;
 
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,41 +12,49 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 
-public class SelectWhisperMessage extends ServerBoundPacketHandler<SelectWhisperMessage.Content> {
-    public static final SelectWhisperMessage INSTANCE = ServerBoundPacketHandler.register(
-            "select_whisper",
-            new SelectWhisperMessage()
+public class SelectWhisperMessage extends ServerBoundNetworkPayload<SelectWhisperMessage> {
+    public static final ServerBoundPacketHandler<SelectWhisperMessage> HANDLER = new ServerBoundPacketHandler<>(
+            Wunderreich.ID("select_whisper"),
+            SelectWhisperMessage::new
     );
+    public final int itemIndex;
 
-    protected SelectWhisperMessage() {
+    protected SelectWhisperMessage(FriendlyByteBuf buf) {
+        super(HANDLER);
+        this.itemIndex = buf.readVarInt();
     }
 
-    public void send(int itemIndex) {
-        this.sendToServer(new Content(itemIndex));
+    protected SelectWhisperMessage(int itemIndex) {
+        super(HANDLER);
+        this.itemIndex = itemIndex;
     }
 
-    @Override
-    protected void serializeOnClient(FriendlyByteBuf buf, Content content) {
-        buf.writeVarInt(content.itemIndex);
-    }
-
-    @Override
-    protected Content deserializeOnServer(FriendlyByteBuf buf, ServerPlayer player, PacketSender responseSender) {
-        int itemIndex = buf.readVarInt();
-        return new Content(itemIndex);
+    public static void send(int itemIndex) {
+        ServerBoundPacketHandler.sendToServer(new SelectWhisperMessage(itemIndex));
     }
 
     @Override
-    protected void processOnGameThread(MinecraftServer server, ServerPlayer player, Content content) {
-        int itemIndex = content.itemIndex;
+    protected void prepareOnClient() {
+
+    }
+
+    @Override
+    protected void write(FriendlyByteBuf buf) {
+        buf.writeVarInt(this.itemIndex);
+    }
+
+    @Override
+    protected void processOnServer(ServerPlayer player, PacketSender responseSender) {
+
+    }
+
+    @Override
+    protected void processOnGameThread(MinecraftServer server, ServerPlayer player) {
         AbstractContainerMenu abstractContainerMenu = player.containerMenu;
 
         if (abstractContainerMenu instanceof WhispererMenu menu) {
-            menu.setSelectionHint(itemIndex);
-            menu.tryMoveItems(itemIndex);
+            menu.setSelectionHint(this.itemIndex);
+            menu.tryMoveItems(this.itemIndex);
         }
-    }
-
-    protected record Content(int itemIndex) {
     }
 }

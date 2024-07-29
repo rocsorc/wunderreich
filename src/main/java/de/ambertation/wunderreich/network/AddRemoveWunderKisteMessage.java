@@ -1,5 +1,7 @@
 package de.ambertation.wunderreich.network;
 
+import de.ambertation.wunderlib.network.ServerBoundNetworkPayload;
+import de.ambertation.wunderlib.network.ServerBoundPacketHandler;
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.blocks.WunderKisteBlock;
 import de.ambertation.wunderreich.utils.LiveBlockManager.LiveBlock;
@@ -15,20 +17,64 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class AddRemoveWunderKisteMessage extends ServerBoundPacketHandler<AddRemoveWunderKisteMessage.Content> {
-    public static final AddRemoveWunderKisteMessage INSTANCE = ServerBoundPacketHandler.register(
-            "wunder_kiste",
-            new AddRemoveWunderKisteMessage()
+
+public class AddRemoveWunderKisteMessage extends ServerBoundNetworkPayload<AddRemoveWunderKisteMessage> {
+    public static final ServerBoundPacketHandler<AddRemoveWunderKisteMessage> HANDLER = new ServerBoundPacketHandler<>(
+            Wunderreich.ID("wunder_kiste"),
+            AddRemoveWunderKisteMessage::new
     );
+
+    public final boolean didAdd;
+    @NotNull
+    public final BlockPos pos;
+
+    @Nullable
+    private ServerLevel level;
+
+    public AddRemoveWunderKisteMessage(FriendlyByteBuf buf) {
+        super(HANDLER);
+        this.didAdd = buf.readBoolean();
+        this.pos = buf.readBlockPos();
+        this.level = null;
+    }
+
+    public AddRemoveWunderKisteMessage(boolean didAdd, BlockPos pos) {
+        super(HANDLER);
+        this.didAdd = didAdd;
+        this.pos = pos;
+        this.level = null;
+    }
+
+    @Override
+    protected void prepareOnClient() {
+
+    }
+
+    @Override
+    protected void write(FriendlyByteBuf buf) {
+        buf.writeBoolean(this.didAdd);
+        buf.writeBlockPos(this.pos);
+    }
+
+    @Override
+    protected void processOnServer(ServerPlayer player, PacketSender responseSender) {
+        this.level = player.serverLevel();
+    }
+
+    @Override
+    protected void processOnGameThread(MinecraftServer server, ServerPlayer player) {
+        if (this.didAdd) addedBox(this.level, this.pos);
+        else removedBox(this.level, this.pos);
+    }
+
 
     static {
         WunderKisteBlock.getLiveBlockManager().onChangeAt(WunderKisteBlock::updateNeighbours);
     }
 
-
-    protected AddRemoveWunderKisteMessage() {
-    }
 
     public static void addedBox(ServerLevel level, BlockPos pos) {
         final LiveBlock lb = new LiveBlock(pos, level);
@@ -50,59 +96,7 @@ public class AddRemoveWunderKisteMessage extends ServerBoundPacketHandler<AddRem
 
     }
 
-    public void send(boolean didAdd, BlockPos pos) {
-        this.sendToServer(new Content(didAdd, pos, null));
+    public static void send(boolean didAdd, BlockPos pos) {
+        ServerBoundPacketHandler.sendToServer(new AddRemoveWunderKisteMessage(didAdd, pos));
     }
-
-    @Override
-    protected void serializeOnClient(FriendlyByteBuf buf, Content content) {
-        buf.writeBoolean(content.didAdd);
-        buf.writeBlockPos(content.pos);
-    }
-
-    @Override
-    protected Content deserializeOnServer(FriendlyByteBuf buf, ServerPlayer player, PacketSender responseSender) {
-        boolean didAdd = buf.readBoolean();
-        BlockPos pos = buf.readBlockPos();
-        ServerLevel level = player.serverLevel();
-        return new Content(didAdd, pos, level);
-
-    }
-
-    @Override
-    protected void processOnGameThread(MinecraftServer server, ServerPlayer player, Content content) {
-        if (content.didAdd) addedBox(content.level, content.pos);
-        else removedBox(content.level, content.pos);
-    }
-
-    protected record Content(boolean didAdd, BlockPos pos, ServerLevel level) {
-    }
-
-//    public final static ResourceLocation CHANNEL = new ResourceLocation(Wunderreich.MOD_ID, "wunder_kiste");
-//
-//    public static void register() {
-//        ServerPlayConnectionEvents.INIT.register((handler, server) -> {
-//            ServerPlayNetworking.registerReceiver(handler,
-//                    CHANNEL,
-//                    (_server, _player, _handler, _buf, _responseSender) -> {
-//                        boolean didAdd = _buf.readBoolean();
-//                        BlockPos pos = _buf.readBlockPos();
-//                        ServerLevel level = _player.getLevel();
-//
-//                        if (didAdd) addedBox(level, pos);
-//                        else removedBox(level, pos);
-//                    });
-//        });
-//
-//        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-//            ServerPlayNetworking.unregisterReceiver(handler, CHANNEL);
-//        });
-//    }
-//
-//    public static void send(boolean didAdd, BlockPos pos) {
-//        FriendlyByteBuf buf = PacketByteBufs.create();
-//        buf.writeBoolean(didAdd);
-//        buf.writeBlockPos(pos);
-//        ClientPlayNetworking.send(CHANNEL, buf);
-//    }
 }

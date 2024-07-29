@@ -1,5 +1,7 @@
 package de.ambertation.wunderreich.network;
 
+import de.ambertation.wunderlib.network.ServerBoundNetworkPayload;
+import de.ambertation.wunderlib.network.ServerBoundPacketHandler;
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.config.Configs;
 import de.ambertation.wunderreich.interfaces.IMerchantMenu;
@@ -59,13 +61,18 @@ record ClosestWhisperer(ItemStack stack, Player player, EquipmentSlot slot) {
     }
 }
 
-public class CycleTradesMessage extends ServerBoundPacketHandler<CycleTradesMessage.Content> {
-    public static final CycleTradesMessage INSTANCE = ServerBoundPacketHandler.register(
-            "cycle_trades",
-            new CycleTradesMessage()
+public class CycleTradesMessage extends ServerBoundNetworkPayload<CycleTradesMessage> {
+    public static final ServerBoundPacketHandler<CycleTradesMessage> HANDLER = new ServerBoundPacketHandler<>(
+            Wunderreich.ID("cycle_trades"),
+            CycleTradesMessage::new
     );
 
+    protected CycleTradesMessage(FriendlyByteBuf buf) {
+        super(HANDLER);
+    }
+
     protected CycleTradesMessage() {
+        super(HANDLER);
     }
 
     public static ItemStack holds(Player player, Item item) {
@@ -133,25 +140,6 @@ public class CycleTradesMessage extends ServerBoundPacketHandler<CycleTradesMess
         ClosestWhisperer whispererStack = getClosestWhisperer(villager, doLog);
         return whispererStack != null;
     }
-
-//    public final static ResourceLocation CHANNEL = new ResourceLocation(Wunderreich.MOD_ID, "cycle_trades");
-//    public static void register() {
-//        ServerPlayConnectionEvents.INIT.register((handler, server) -> {
-//            ServerPlayNetworking.registerReceiver(handler,
-//                    CHANNEL,
-//                    (_server, _player, _handler, _buf, _responseSender) -> {
-//                        cycleTrades(_player);
-//                    });
-//        });
-//
-//        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-//            ServerPlayNetworking.unregisterReceiver(handler, CHANNEL);
-//        });
-//    }
-//
-//    public static void send() {
-//        ClientPlayNetworking.send(CHANNEL, PacketByteBufs.create());
-//    }
 
     public static boolean hasSelectedTrades(Villager villager, MerchantOffers offers) {
         if (offers == null) return true;
@@ -244,23 +232,29 @@ public class CycleTradesMessage extends ServerBoundPacketHandler<CycleTradesMess
         }
     }
 
-    public void send() {
-        sendToServer(null);
+    public static void send() {
+        ServerBoundPacketHandler.sendToServer(new CycleTradesMessage());
+    }
+
+
+    @Override
+    protected void prepareOnClient() {
+
     }
 
     @Override
-    protected void serializeOnClient(FriendlyByteBuf buf, Content content) {
+    protected void processOnServer(ServerPlayer player, PacketSender responseSender) {
 
     }
 
     @Override
-    protected Content deserializeOnServer(FriendlyByteBuf buf, ServerPlayer player, PacketSender responseSender) {
-        return null;
-    }
-
-    @Override
-    protected void processOnGameThread(MinecraftServer server, ServerPlayer player, Content content) {
+    protected void processOnGameThread(MinecraftServer server, ServerPlayer player) {
         cycleTrades(player);
+    }
+
+    @Override
+    protected void write(FriendlyByteBuf buf) {
+
     }
 
     protected record Content() {
