@@ -1,0 +1,7 @@
+{
+  "wunderreich:global": {
+    "initializer": "de.ambertation.wunderreich.integration.wthit.WailaPlugin",
+    "side": "*",
+    "required": []
+  }
+}

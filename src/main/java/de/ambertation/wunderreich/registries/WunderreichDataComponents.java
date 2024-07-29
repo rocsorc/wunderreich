@@ -1,6 +1,7 @@
 package de.ambertation.wunderreich.registries;
 
 import de.ambertation.wunderreich.Wunderreich;
+import de.ambertation.wunderreich.data_components.WhisperData;
 import de.ambertation.wunderreich.data_components.WunderKisteData;
 
 import net.minecraft.core.Registry;
@@ -17,6 +18,13 @@ public class WunderreichDataComponents {
             (DataComponentType.Builder<WunderKisteData> builder) -> builder
                     .persistent(WunderKisteData.CODEC)
                     .networkSynchronized(WunderKisteData.STREAM_CODEC)
+    );
+
+    public static final DataComponentType<WhisperData> WHISPERER = registerDataComponent(
+            Wunderreich.ID("whispered_enchantment"),
+            (DataComponentType.Builder<WhisperData> builder) -> builder
+                    .persistent(WhisperData.CODEC)
+                    .networkSynchronized(WhisperData.STREAM_CODEC)
     );
 
     private static <T> DataComponentType<T> registerDataComponent(

@@ -10,16 +10,17 @@ import de.ambertation.wunderreich.registries.WunderreichRules;
 import de.ambertation.wunderreich.utils.ItemUtil;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -31,11 +32,14 @@ import net.minecraft.world.level.Level;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+import com.google.gson.JsonElement;
+
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContainer.Input> {
@@ -98,30 +102,50 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
 //                .collect(Collectors.toList());
     }
 
+    @ApiStatus.Internal
     public static void register() {
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Serializer.ID, Serializer.INSTANCE);
         Registry.register(BuiltInRegistries.RECIPE_TYPE, Type.ID, Type.INSTANCE);
+    }
 
+    public static RegistryAccess.Frozen REGISTRY_PROVIDER_OR_NULL = null;
+
+    @ApiStatus.Internal
+    public static void registerForLevel(RegistryAccess.Frozen provider) {
+        REGISTRY_PROVIDER_OR_NULL = provider;
         RECIPES.clear();
 
         if (WunderreichRules.Whispers.allowLibrarianSelection()) {
             List<Holder<Enchantment>> enchants = new LinkedList<>();
-            BuiltInRegistries.ENCHANTMENT
-                    .stream()
-                    .filter(e -> e.isTradeable())
-                    .forEach(e -> {
-                        ResourceLocation ID = makeID(e);
-                        if (Configs.RECIPE_CONFIG.newBooleanFor(ID.getPath(), ID).get())
-                            enchants.add(e);
-                    });
-            enchants.sort(Comparator.comparing(a -> WhisperRule.getFullname(a)
-                                                               .getString()));
+            final var enchantments = provider.lookup(Registries.ENCHANTMENT).orElse(null);
+            if (enchantments != null) {
+                enchantments.listElements()
+                            .filter(e -> e.is(EnchantmentTags.TRADEABLE))
+                            .forEach(e -> {
+                                ResourceLocation ID = makeID(e);
+                                if (Configs.RECIPE_CONFIG.newBooleanFor(ID.getPath(), ID).get())
+                                    enchants.add(e);
+                            });
 
-            enchants.forEach(e -> {
-                ImprinterRecipe r = new ImprinterRecipe(e);
-                RECIPES.add(r);
-                WunderreichRecipes.RECIPES.put(r.id, Serializer.INSTANCE.toJson(r));
-            });
+                enchants.sort(Comparator.comparing(a -> WhisperRule.getFullname(a)
+                                                                   .getString()));
+
+                enchants.forEach(e -> {
+                    ImprinterRecipe r = new ImprinterRecipe(e);
+                    RECIPES.add(r);
+                    if (REGISTRY_PROVIDER_OR_NULL == null) {
+                        Wunderreich.LOGGER.error("Registry provider is null. Can not create Imprinter Recipes.");
+                        return;
+                    }
+                    RegistryOps<JsonElement> registryOps = REGISTRY_PROVIDER_OR_NULL.createSerializationContext(JsonOps.INSTANCE);
+                    WunderreichRecipes.RECIPES.put(
+                            r.id,
+                            Serializer.CODEC.codec()
+                                            .encodeStart(registryOps, r)
+                                            .getOrThrow()
+                    );
+                });
+            }
         }
 
         resortRecipes();
@@ -187,7 +211,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
 
     public static class Type implements RecipeType<ImprinterRecipe> {
         public static final ResourceLocation ID = Wunderreich.ID("imprinter");
-        public static final RecipeType<ImprinterRecipe> INSTANCE = new Type(); //Registry.register(Registry.RECIPE_TYPE, Wunderreich.makeID(ID+"_recipe"), new Type());
+        public static final RecipeType<ImprinterRecipe> INSTANCE = new Type();
 
         Type() {
         }
@@ -211,7 +235,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         public static final StreamCodec<RegistryFriendlyByteBuf, ImprinterRecipe> STREAM_CODEC = StreamCodec.of(ImprinterRecipe.Serializer::toNetwork, ImprinterRecipe.Serializer::fromNetwork);
 
         public final static ResourceLocation ID = Type.ID;
-        public final static Serializer INSTANCE = new Serializer(); //Registry.register(Registry.RECIPE_SERIALIZER, Wunderreich.makeID(Type.ID), new Serializer());
+        public final static Serializer INSTANCE = new Serializer();
 
         @Override
         public @NotNull MapCodec<ImprinterRecipe> codec() {

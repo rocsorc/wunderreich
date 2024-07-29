@@ -215,7 +215,7 @@ public class RecipeJsonBuilder {
             Wunderreich.LOGGER.info("Ignoring Recipe for " + this.ID + " due to missing result item.");
             return null;
         }
-        result.addProperty("item", resItem.toString());
+        result.addProperty("id", resItem.toString());
         result.addProperty("count", count);
         json.add("result", result);
 

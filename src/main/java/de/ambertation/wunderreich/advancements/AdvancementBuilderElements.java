@@ -37,7 +37,8 @@ class Display {
         JsonObject root = new JsonObject();
 
         JsonObject obj = new JsonObject();
-        obj.add("item", new JsonPrimitive(icon));
+        obj.add("id", new JsonPrimitive(icon));
+        obj.add("count", new JsonPrimitive(1));
         root.add("icon", obj);
 
         obj = new JsonObject();

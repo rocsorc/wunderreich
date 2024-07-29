@@ -92,7 +92,8 @@ public class WunderreichAdvancements {
                     .startDisplay(WunderreichItems.BUILDERS_TROWEL, b -> b.showToast().visible().announceToChat())
                     .parent(root)
                     .startCriteria("use_trowel", USE_TROWEL_ID.toString(), b -> {
-                    }).register();
+                    })
+                    .register();
         }
 
         if (Configs.BLOCK_CONFIG.isEnabled(WunderreichBlocks.WUNDER_KISTE)) {

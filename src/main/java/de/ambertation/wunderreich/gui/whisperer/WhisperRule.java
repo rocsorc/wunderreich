@@ -10,6 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 
 public class WhisperRule {
@@ -65,12 +66,13 @@ public class WhisperRule {
     }
 
     public static Component getFullname(Holder<Enchantment> e) {
-        return getFullname(e, e.getMaxLevel());
+        return getFullname(e, e.value().getMaxLevel());
     }
 
-    public static Component getFullname(Enchantment e, int lvl) {
-        MutableComponent mutableComponent = Component.translatable(e.getDescriptionId());
-        if (e.isCurse()) {
+    public static Component getFullname(Holder<Enchantment> eh, int lvl) {
+        final Enchantment e = eh.value();
+        MutableComponent mutableComponent = Component.translatable(eh.unwrapKey().orElseThrow().location().toString());
+        if (eh.is(Enchantments.BINDING_CURSE)) {
             mutableComponent.withStyle(ChatFormatting.RED);
         } else {
             mutableComponent.withStyle(ChatFormatting.GRAY);
@@ -93,11 +95,7 @@ public class WhisperRule {
             return true;
         } else {
             ItemStack itemStack3 = itemStack.copy();
-            if (itemStack3.getItem().canBeDepleted()) {
-                itemStack3.setDamageValue(itemStack3.getDamageValue());
-            }
-
-
+            itemStack3.setDamageValue(itemStack3.getDamageValue());
             return itemStack2.test(itemStack3)  /*&& (!itemStack2.gethasTag() || itemStack3.hasTag() && NbtUtils.compareNbt(itemStack2.getTag(), itemStack3.getTag(), false))*/;
         }
     }
@@ -142,6 +140,6 @@ public class WhisperRule {
     }
 
     public String getCategory() {
-        return enchantment.category.name();
+        return LegacyEnchantmentCategories.fromEnchantment(enchantment).name();
     }
 }

@@ -10,23 +10,21 @@ import de.ambertation.wunderreich.items.VillagerWhisperer;
 import de.ambertation.wunderreich.registries.WunderreichItems;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 
@@ -75,22 +73,24 @@ public class CycleTradesMessage extends ServerBoundNetworkPayload<CycleTradesMes
         super(HANDLER);
     }
 
-    public static ItemStack holds(Player player, Item item) {
-        if (player.getMainHandItem().is(item)) return player.getMainHandItem();
-        if (player.getOffhandItem().is(item)) return player.getOffhandItem();
+    public static ClosestWhisperer holds(Player player, Item item) {
+        if (player.getMainHandItem().is(item))
+            return new ClosestWhisperer(player.getMainHandItem(), player, EquipmentSlot.MAINHAND);
+        if (player.getOffhandItem().is(item))
+            return new ClosestWhisperer(player.getOffhandItem(), player, EquipmentSlot.OFFHAND);
         return null;
     }
 
-    public static ItemStack containsWhisperer(Player player) {
-        ItemStack res = null;
+    public static ClosestWhisperer containsWhisperer(Player player) {
+        ClosestWhisperer res = null;
         if (Configs.ITEM_CONFIG.isEnabled(WunderreichItems.BLANK_WHISPERER)) {
             res = holds(player, WunderreichItems.BLANK_WHISPERER);
         }
         if (res == null && Configs.ITEM_CONFIG.isEnabled(WunderreichItems.WHISPERER)) {
             if (player.getMainHandItem().getItem() instanceof TrainedVillagerWhisperer) {
-                res = player.getMainHandItem();
+                res = new ClosestWhisperer(player.getMainHandItem(), player, EquipmentSlot.MAINHAND);
             } else if (player.getOffhandItem().getItem() instanceof TrainedVillagerWhisperer) {
-                res = player.getOffhandItem();
+                res = new ClosestWhisperer(player.getOffhandItem(), player, EquipmentSlot.OFFHAND);
             }
         }
         return res;
@@ -150,27 +150,30 @@ public class CycleTradesMessage extends ServerBoundNetworkPayload<CycleTradesMes
 
         for (MerchantOffer offer : offers) {
             if (offer.getResult().is(Items.ENCHANTED_BOOK)) {
-                var enchantments = EnchantedBookItem.getEnchantments(offer.getResult());
+                final ItemStack results = offer.getResult();
+                var enchantments = results.getEnchantments();
                 if (!enchantments.isEmpty()) {
-                    ResourceLocation type = EnchantmentHelper.getEnchantmentId(enchantments.getCompound(0));
+                    for (var enc : enchantments.entrySet()) {
+                        final Holder<Enchantment> type = enc.getKey();
 
-                    final int duraCost = WunderreichRules.Whispers.cyclingNeedsWhisperer() ? 1 : 2;
-                    if (whisperer instanceof TrainedVillagerWhisperer trained) {
-                        if (type.equals(trained.getEnchantmentID(whispererStack.stack()))) {
+                        final int duraCost = WunderreichRules.Whispers.cyclingNeedsWhisperer() ? 1 : 2;
+                        if (whisperer instanceof TrainedVillagerWhisperer trained) {
+                            if (type.is(trained.getEnchantment(whispererStack.stack()))) {
+                                whispererStack.stack().hurtAndBreak(
+                                        duraCost,
+                                        whispererStack.player(),
+                                        whispererStack.slot()
+                                );
+                                return true;
+                            }
+                        } else {
                             whispererStack.stack().hurtAndBreak(
                                     duraCost,
                                     whispererStack.player(),
-                                    player -> player.broadcastBreakEvent(whispererStack.slot())
+                                    whispererStack.slot()
                             );
                             return true;
                         }
-                    } else {
-                        whispererStack.stack().hurtAndBreak(
-                                duraCost,
-                                whispererStack.player(),
-                                player -> player.broadcastBreakEvent(whispererStack.slot())
-                        );
-                        return true;
                     }
                 } else {
                     return true;
@@ -196,14 +199,12 @@ public class CycleTradesMessage extends ServerBoundNetworkPayload<CycleTradesMes
             }
 
             if (WunderreichRules.Whispers.cyclingNeedsWhisperer()) {
-                ItemStack whisp = containsWhisperer(player);
+                ClosestWhisperer whisp = containsWhisperer(player);
                 if (whisp == null) return;
-                whisp.hurtAndBreak(
+                whisp.stack().hurtAndBreak(
                         1,
                         player,
-                        pp -> pp.broadcastBreakEvent(player.getMainHandItem().is(whisp.getItem())
-                                ? InteractionHand.MAIN_HAND
-                                : InteractionHand.OFF_HAND)
+                        whisp.slot()
                 );
             }
 

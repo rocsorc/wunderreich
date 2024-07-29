@@ -4,7 +4,7 @@ import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.RecipeBookCategories;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,8 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ClientRecipeBookMixin {
 
     @Inject(method = "getCategory", at = @At("HEAD"), cancellable = true)
-    private static void wunderreich_getCategory(Recipe<?> recipe, CallbackInfoReturnable<RecipeBookCategories> cir) {
-        RecipeType<?> recipeType = recipe.getType();
+    private static void wunderreich_getCategory(
+            RecipeHolder<?> recipeHolder,
+            CallbackInfoReturnable<RecipeBookCategories> cir
+    ) {
+        RecipeType<?> recipeType = recipeHolder.value().getType();
         if (recipeType == ImprinterRecipe.Type.INSTANCE) {
             cir.setReturnValue(RecipeBookCategories.UNKNOWN);
             cir.cancel();

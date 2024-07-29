@@ -85,6 +85,6 @@ public class DefaultGameRules extends ConfigFile {
 
 
     public DefaultGameRules() {
-        super(Wunderreich.VERSION_PROVIDER, "defaultGameRules");
+        super(Wunderreich.VERSION_PROVIDER, "default_game_rules");
     }
 }

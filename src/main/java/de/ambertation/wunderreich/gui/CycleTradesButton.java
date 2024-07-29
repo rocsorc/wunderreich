@@ -4,7 +4,6 @@
 package de.ambertation.wunderreich.gui;
 
 import de.ambertation.wunderreich.Wunderreich;
-import de.ambertation.wunderreich.items.TrainedVillagerWhisperer;
 import de.ambertation.wunderreich.network.CycleTradesMessage;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
@@ -15,15 +14,17 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
+
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class CycleTradesButton extends Button {
 
         return button;
     }
-    
+
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         visible = canUse && screen.getMenu().showProgressBar() && screen.getMenu().getTraderXp() <= 0;
@@ -101,15 +102,13 @@ public class CycleTradesButton extends Button {
             MerchantOffers offers = this.menu.getOffers();
             for (MerchantOffer offer : offers) {
                 if (offer.getResult().is(Items.ENCHANTED_BOOK)) {
-                    var enchantments = EnchantedBookItem.getEnchantments(offer.getResult());
+                    final var result = offer.getResult();
+                    final ItemEnchantments enchantments = result.getEnchantments();
 
-                    for (int i = 0; i < enchantments.size(); i++) {
-                        var tag = enchantments.getCompound(i);
-                        Enchantment e = TrainedVillagerWhisperer.findEnchantment(tag);
-                        int level = EnchantmentHelper.getEnchantmentLevel(tag);
-
-
-                        components.add(e.getFullname(level));
+                    for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                        final Holder<Enchantment> e = entry.getKey();
+                        final int level = enchantments.getLevel(e);
+                        components.add(Enchantment.getFullname(e, level));
                     }
                 }
             }

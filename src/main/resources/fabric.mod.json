@@ -51,20 +51,16 @@
     "wunderlib": "21.0.x"
   },
   "breaks": {
-    "wunderlib": "<21.0.2"
+    "wunderlib": "<21.0.5"
   },
   "suggests": {
     "modmenu": "11.0.x",
-    "rei": "12.x",
+    "rei": "16.x",
     "emi": "1.1.x"
   },
   "custom": {
-    "bclib": {
+    "wover": {
       "updater_icon": "icon_updater.png"
-    },
-    "waila:plugins": {
-      "id": "wunderreich:global",
-      "initializer": "de.ambertation.wunderreich.integration.wthit.WailaPlugin"
     }
   }
 }

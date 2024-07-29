@@ -171,8 +171,11 @@ public class StonecutterJsonBuilder {
             Wunderreich.LOGGER.info("Ignoring Stonecutter-Recipe for " + this.ID + " due to missing result item.");
             return null;
         }
-        json.addProperty("result", resLoc.toString());
-        json.addProperty("count", count);
+
+        JsonObject stack = new JsonObject();
+        stack.addProperty("id", resLoc.toString());
+        stack.addProperty("count", count);
+        json.add("result", stack);
 
         //System.out.println(json);
         return json;

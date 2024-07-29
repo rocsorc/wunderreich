@@ -9,7 +9,7 @@ import de.ambertation.wunderreich.utils.RandomList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -98,6 +98,7 @@ public class BuildersTrowel extends DiggerItem {
                         ctx.isInside()
                 )
         );
+
         BlockItem bi = (BlockItem) item.getItem();
 
         InteractionResult result = bi.place(bctx);
@@ -106,8 +107,7 @@ public class BuildersTrowel extends DiggerItem {
                 WunderreichAdvancements.USE_TROWEL.trigger(sp);
             }
             if (!p.getAbilities().instabuild) {
-                //item.shrink(1); //place does already shrink
-                ctx.getItemInHand().hurtAndBreak(1, p, EquipmentSlot.MAINHAND);
+                ctx.getItemInHand().hurtAndBreak(1, p, LivingEntity.getSlotForHand(ctx.getHand()));
             }
         }
 
