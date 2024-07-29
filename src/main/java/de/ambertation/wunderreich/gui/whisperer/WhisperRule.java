@@ -7,6 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -71,7 +72,8 @@ public class WhisperRule {
 
     public static Component getFullname(Holder<Enchantment> eh, int lvl) {
         final Enchantment e = eh.value();
-        MutableComponent mutableComponent = Component.translatable(eh.unwrapKey().orElseThrow().location().toString());
+        final ResourceLocation loc = eh.unwrapKey().orElseThrow().location();
+        MutableComponent mutableComponent = Component.translatable("enchantment." + loc.getNamespace() + "." + loc.getPath());
         if (eh.is(Enchantments.BINDING_CURSE)) {
             mutableComponent.withStyle(ChatFormatting.RED);
         } else {
