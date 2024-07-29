@@ -7,8 +7,12 @@ import de.ambertation.wunderreich.config.LevelDataFile;
 import de.ambertation.wunderreich.items.WunderKisteItem;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -18,29 +22,37 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 public enum WunderKisteDomain implements StringRepresentable {
-    WHITE("white", Items.WHITE_DYE, 0xFFFFFFFF, false, "wunder_kiste"),
-    ORANGE("orange", Items.ORANGE_DYE, 0xFFF9932B, true),
-    MAGENTA("magenta", Items.MAGENTA_DYE, 0xFFD660D1, true),
-    LIGHT_BLUE("light_blue", Items.LIGHT_BLUE_DYE, 0xFF5CB7E7, false),
-    YELLOW("yellow", Items.YELLOW_DYE, 0xFFFED93F, true),
-    LIME("lime", Items.LIME_DYE, 0xFF86CC26, true),
-    PINK("pink", Items.PINK_DYE, 0xFFF4B2C9, true),
-    GRAY("gray", Items.GRAY_DYE, 0xFF474F52, false),
-    LIGHT_GRAY("light_gray", Items.LIGHT_GRAY_DYE, 0xFF9D9D97, false),
-    CYAN("cyan", Items.CYAN_DYE, 0xFF169B9C, true),
-    PURPLE("purple", Items.PURPLE_DYE, 0xFF9743CD, true),
-    BLUE("blue", Items.BLUE_DYE, 0xFF2C2F90, false),
-    BROWN("brown", Items.BROWN_DYE, 0xFF835432, true),
-    GREEN("green", Items.GREEN_DYE, 0xFF658619, true),
-    RED("red", Items.RED_DYE, 0xFFB8342C, true),
-    BLACK("black", Items.BLACK_DYE, 0xFF252529, false);
+    WHITE(0, "white", Items.WHITE_DYE, 0xFFFFFFFF, false, "wunder_kiste"),
+    ORANGE(1, "orange", Items.ORANGE_DYE, 0xFFF9932B, true),
+    MAGENTA(2, "magenta", Items.MAGENTA_DYE, 0xFFD660D1, true),
+    LIGHT_BLUE(3, "light_blue", Items.LIGHT_BLUE_DYE, 0xFF5CB7E7, false),
+    YELLOW(4, "yellow", Items.YELLOW_DYE, 0xFFFED93F, true),
+    LIME(5, "lime", Items.LIME_DYE, 0xFF86CC26, true),
+    PINK(6, "pink", Items.PINK_DYE, 0xFFF4B2C9, true),
+    GRAY(7, "gray", Items.GRAY_DYE, 0xFF474F52, false),
+    LIGHT_GRAY(8, "light_gray", Items.LIGHT_GRAY_DYE, 0xFF9D9D97, false),
+    CYAN(9, "cyan", Items.CYAN_DYE, 0xFF169B9C, true),
+    PURPLE(10, "purple", Items.PURPLE_DYE, 0xFF9743CD, true),
+    BLUE(11, "blue", Items.BLUE_DYE, 0xFF2C2F90, false),
+    BROWN(12, "brown", Items.BROWN_DYE, 0xFF835432, true),
+    GREEN(13, "green", Items.GREEN_DYE, 0xFF658619, true),
+    RED(14, "red", Items.RED_DYE, 0xFFB8342C, true),
+    BLACK(15, "black", Items.BLACK_DYE, 0xFF252529, false);
 
+    public static final IntFunction<WunderKisteDomain> BY_ID = ByIdMap.continuous(domain -> domain.id, WunderKisteDomain.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+    public static final Codec<WunderKisteDomain> CODEC = StringRepresentable.fromEnum(WunderKisteDomain::values);
+    public static final StreamCodec<ByteBuf, WunderKisteDomain> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, domain -> domain.id);
+
+    private final int id;
     public final Item triggerItem;
     public final ID domainID;
     public final int color;
@@ -50,7 +62,8 @@ public enum WunderKisteDomain implements StringRepresentable {
     public final boolean useMonochromeFallback;
     private final Object texture;
 
-    WunderKisteDomain(String name, Item triggerItem, int color, boolean useMonochromeFallback, String texture) {
+    WunderKisteDomain(int id, String name, Item triggerItem, int color, boolean useMonochromeFallback, String texture) {
+        this.id = id;
         this.name = name;
         this.domainID = new ID(name, false);
         this.triggerItem = triggerItem;
@@ -75,8 +88,8 @@ public enum WunderKisteDomain implements StringRepresentable {
         }
     }
 
-    WunderKisteDomain(String name, Item triggerItem, int color, boolean useMonochromeFallback) {
-        this(name, triggerItem, color, useMonochromeFallback, "wunder_kiste_" + name);
+    WunderKisteDomain(int id, String name, Item triggerItem, int color, boolean useMonochromeFallback) {
+        this(id, name, triggerItem, color, useMonochromeFallback, "wunder_kiste_" + name);
     }
 
     @Environment(EnvType.CLIENT)

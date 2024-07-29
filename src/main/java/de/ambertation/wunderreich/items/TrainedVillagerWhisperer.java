@@ -5,6 +5,7 @@ import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 import de.ambertation.wunderreich.registries.WunderreichItems;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -43,7 +44,7 @@ public class TrainedVillagerWhisperer extends VillagerWhisperer {
         return Items.AIR.getDescriptionId();
     }
 
-    public static ItemStack createForEnchantment(Enchantment enchantment) {
+    public static ItemStack createForEnchantment(Holder<Enchantment> enchantment) {
         ItemStack itemStack = new ItemStack(WunderreichItems.WHISPERER);
         setEnchantment(itemStack, enchantment);
         return itemStack;
@@ -54,7 +55,7 @@ public class TrainedVillagerWhisperer extends VillagerWhisperer {
         return tag != null ? tag.getCompound(TAG_NAME) : new CompoundTag();
     }
 
-    public static void setEnchantment(ItemStack itemStack, Enchantment enchantment) {
+    public static void setEnchantment(ItemStack itemStack, Holder<Enchantment> enchantment) {
         ResourceLocation resourceLocation = EnchantmentHelper.getEnchantmentId(enchantment);
         CompoundTag tag = EnchantmentHelper.storeEnchantment(resourceLocation, enchantment.getMaxLevel());
         itemStack.getOrCreateTag().put(TAG_NAME, tag);

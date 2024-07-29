@@ -11,10 +11,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.function.Consumer;
 
 @Mixin(Sheets.class)
 public abstract class SheetsMixin {
@@ -30,12 +27,4 @@ public abstract class SheetsMixin {
             cir.cancel();
         }
     }
-
-    @Inject(method = "getAllMaterials", at = @At("TAIL"))
-    private static void wunderreich_getAll(Consumer<Material> consumer, CallbackInfo ci) {
-        consumer.accept(WunderreichClient.WUNDER_KISTE_TOP_LOCATION);
-        consumer.accept(WunderreichClient.WUNDER_KISTE_MONOCHROME_TOP_LOCATION);
-        WunderreichClient.getAllWunderkisteMaterials(consumer);
-    }
-
 }

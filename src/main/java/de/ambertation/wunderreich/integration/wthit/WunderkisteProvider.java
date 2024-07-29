@@ -83,8 +83,8 @@ public enum WunderkisteProvider implements IBlockComponentProvider {
         BlockEntity entity = accessor.getBlockEntity();
         if (entity instanceof WunderKisteBlockEntity kiste) {
             BlockState state = accessor.getBlockState();
-            CompoundTag serverData = accessor.getServerData();
 
+            CompoundTag serverData = accessor.getData().raw();
             addNetworkTooltip(tooltip, state, kiste, serverData);
         }
     }

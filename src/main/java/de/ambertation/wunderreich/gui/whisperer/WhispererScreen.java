@@ -58,7 +58,7 @@ public class WhispererScreen
     private void postButtonClick() {
         this.menu.setSelectionHint(this.shopItem);
         this.menu.tryMoveItems(this.shopItem);
-        SelectWhisperMessage.INSTANCE.send(this.shopItem);
+        SelectWhisperMessage.send(this.shopItem);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class CycleTradesButton extends Button {
         final int top = (merchantScreenMixin.height - imageHeight) / 2;
 
         CycleTradesButton button = new CycleTradesButton(left - CycleTradesButton.WIDTH - 2, top + 2, b -> {
-            CycleTradesMessage.INSTANCE.send();
+            CycleTradesMessage.send();
         }, merchantScreen, menu);
 
         if (WunderreichRules.Whispers.cyclingNeedsWhisperer()) {
@@ -71,15 +71,11 @@ public class CycleTradesButton extends Button {
 
         return button;
     }
-
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        visible = canUse && screen.getMenu().showProgressBar() && screen.getMenu().getTraderXp() <= 0;
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-    }
-
+    
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        visible = canUse && screen.getMenu().showProgressBar() && screen.getMenu().getTraderXp() <= 0;
+
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         final int u = isHovered ? 26 : 3;
 

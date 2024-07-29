@@ -11,8 +11,6 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
-
 import java.util.function.BiFunction;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,15 +19,6 @@ public class WunderreichMenuTypes {
             Wunderreich.ID("whisperer"),
             WhispererMenu::new
     );
-
-    static <T extends AbstractContainerMenu> MenuType<T> registerExtended(
-            ResourceLocation id,
-            ExtendedScreenHandlerType.ExtendedFactory<T> factory
-    ) {
-        MenuType<T> type = new ExtendedScreenHandlerType<>(factory);
-        return registerType(id, type);
-    }
-
 
     static <T extends AbstractContainerMenu> MenuType<T> registerSimple(
             ResourceLocation id,

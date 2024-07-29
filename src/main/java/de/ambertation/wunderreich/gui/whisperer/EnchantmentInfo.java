@@ -1,5 +1,6 @@
 package de.ambertation.wunderreich.gui.whisperer;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -10,7 +11,7 @@ public class EnchantmentInfo {
     public final ItemStack type;
     public final int baseXP;
 
-    public EnchantmentInfo(Enchantment enchantment) {
+    public EnchantmentInfo(Holder<Enchantment> enchantment) {
         int mul;
         if (enchantment.getRarity() == Enchantment.Rarity.VERY_RARE) {
             mul = 6;

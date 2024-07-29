@@ -4,7 +4,7 @@ import de.ambertation.wunderlib.math.sdf.SDF;
 import de.ambertation.wunderlib.utils.Version;
 import de.ambertation.wunderreich.advancements.AdvancementsJsonBuilder;
 import de.ambertation.wunderreich.config.Configs;
-import de.ambertation.wunderreich.network.ServerBoundPacketHandler;
+import de.ambertation.wunderreich.network.ServerBoundNetworkHandlers;
 import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 import de.ambertation.wunderreich.recipes.RecipeJsonBuilder;
 import de.ambertation.wunderreich.recipes.StonecutterJsonBuilder;
@@ -50,9 +50,7 @@ public class Wunderreich implements ModInitializer {
 
         SDF.ensureStaticallyLoaded();
 
-        // This code runs as soon as Minecraft is in a mod-load-ready state.
-        // However, some things (like resources) may still be uninitialized.
-        // Proceed with mild caution.
+        WunderreichDataComponents.ensureStaticallyLoaded();
         WunderreichBlockEntities.register();
         WunderreichBlocks.register();
         WunderreichItems.register();
@@ -63,7 +61,7 @@ public class Wunderreich implements ModInitializer {
         WunderreichMenuTypes.ensureStaticallyLoaded();
 
         ImprinterRecipe.register();
-        ServerBoundPacketHandler.register();
+        ServerBoundNetworkHandlers.register();
 
         Configs.saveConfigs();
 

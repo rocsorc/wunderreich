@@ -1,6 +1,7 @@
 package de.ambertation.wunderreich.items;
 
 import de.ambertation.wunderreich.blocks.WunderKisteBlock;
+import de.ambertation.wunderreich.data_components.WunderKisteData;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
 import de.ambertation.wunderreich.registries.WunderreichItems;
 import de.ambertation.wunderreich.registries.WunderreichRules;
@@ -8,18 +9,17 @@ import de.ambertation.wunderreich.utils.WunderKisteDomain;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+
+import static de.ambertation.wunderreich.registries.WunderreichDataComponents.WUNDERKISTE;
 
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class WunderKisteItem extends BlockItem {
     public WunderKisteItem(Block block) {
@@ -27,23 +27,17 @@ public class WunderKisteItem extends BlockItem {
     }
 
     public static WunderKisteDomain getDomain(ItemStack itemStack) {
-        CompoundTag tag = itemStack.getTag();
-        if (tag != null) {
-            tag = tag.getCompound(BlockItem.BLOCK_STATE_TAG);
-            if (tag.contains(WunderKisteBlock.DOMAIN.getName())) {
-                String domainName = tag.getString(WunderKisteBlock.DOMAIN.getName());
-                return WunderKisteBlock.DOMAIN.getValue(domainName).orElse(WunderKisteBlock.DEFAULT_DOMAIN);
-            }
-        }
+        final WunderKisteData data = itemStack.get(WUNDERKISTE);
+        if (data != null) return data.domain();
+
         return WunderKisteBlock.DEFAULT_DOMAIN;
     }
 
     public static ItemStack setDomain(ItemStack itemStack, WunderKisteDomain domain) {
-        CompoundTag tag = new CompoundTag();
-
-        if (!WunderKisteBlock.DEFAULT_DOMAIN.equals(domain)) {
-            tag.putString(WunderKisteBlock.DOMAIN.getName(), domain.toString());
-            itemStack.addTagElement(BlockItem.BLOCK_STATE_TAG, tag);
+        if (WunderKisteBlock.DEFAULT_DOMAIN.equals(domain)) {
+            itemStack.remove(WUNDERKISTE);
+        } else {
+            itemStack.set(WUNDERKISTE, new WunderKisteData(domain));
         }
 
         return itemStack;
@@ -69,12 +63,12 @@ public class WunderKisteItem extends BlockItem {
 
     @Override
     public void appendHoverText(
-            @NotNull ItemStack itemStack,
-            @Nullable Level level,
-            @NotNull List<Component> list,
-            @NotNull TooltipFlag tooltipFlag
+            ItemStack itemStack,
+            TooltipContext tooltipContext,
+            List<Component> list,
+            TooltipFlag tooltipFlag
     ) {
-        super.appendHoverText(itemStack, level, list, tooltipFlag);
+        super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
         if (WunderreichRules.Wunderkiste.haveMultiple()) {
             final WunderKisteDomain domain = getDomain(itemStack);
 

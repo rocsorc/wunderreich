@@ -4,6 +4,7 @@ import de.ambertation.wunderreich.items.TrainedVillagerWhisperer;
 import de.ambertation.wunderreich.registries.WunderreichItems;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -12,14 +13,14 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 
 public class WhisperRule {
-    public final Enchantment enchantment;
+    public final Holder<Enchantment> enchantment;
     public final Ingredient inputA;
     public final Ingredient inputB;
     public final ItemStack output;
     public final ItemStack type;
     public final int baseXP;
 
-    private WhisperRule(Enchantment enchantment, EnchantmentInfo nfo) {
+    private WhisperRule(Holder<Enchantment> enchantment, EnchantmentInfo nfo) {
         this(
                 enchantment,
                 Ingredient.of(nfo.inputA),
@@ -29,16 +30,22 @@ public class WhisperRule {
         );
     }
 
-    protected WhisperRule(Enchantment enchantment, Ingredient inputA, Ingredient inputB, int baseXP) {
+    protected WhisperRule(Holder<Enchantment> enchantment, Ingredient inputA, Ingredient inputB, int baseXP) {
         this(enchantment, inputA, inputB, baseXP, new EnchantmentInfo(enchantment).type);
     }
 
-    protected WhisperRule(Enchantment enchantment, Ingredient inputA, Ingredient inputB, int baseXP, ItemStack type) {
+    protected WhisperRule(
+            Holder<Enchantment> enchantment,
+            Ingredient inputA,
+            Ingredient inputB,
+            int baseXP,
+            ItemStack type
+    ) {
         this(enchantment, inputA, inputB, TrainedVillagerWhisperer.createForEnchantment(enchantment), baseXP, type);
     }
 
     protected WhisperRule(
-            Enchantment enchantment,
+            Holder<Enchantment> enchantment,
             Ingredient inputA,
             Ingredient inputB,
             ItemStack output,
@@ -53,11 +60,11 @@ public class WhisperRule {
         this.type = type;
     }
 
-    protected WhisperRule(Enchantment enchantment) {
+    protected WhisperRule(Holder<Enchantment> enchantment) {
         this(enchantment, new EnchantmentInfo(enchantment));
     }
 
-    public static Component getFullname(Enchantment e) {
+    public static Component getFullname(Holder<Enchantment> e) {
         return getFullname(e, e.getMaxLevel());
     }
 

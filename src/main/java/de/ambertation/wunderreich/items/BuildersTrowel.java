@@ -9,6 +9,7 @@ import de.ambertation.wunderreich.utils.RandomList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -22,14 +23,13 @@ public class BuildersTrowel extends DiggerItem {
 
     public BuildersTrowel(Tiers tier) {
         super(
-                -2.5f, //attack DamageBase
-                -0.5f, //attack Speed
                 tier,
                 WunderreichTags.MINEABLE_TROWEL,
                 WunderreichItems
                         .makeItemSettings()
                         .rarity(Rarity.UNCOMMON)
                         .durability(tier.getUses() * 4)
+                        .attributes(DiggerItem.createAttributes(tier, -2.5f, -0.5f))
         );
         seed = (long) (Math.random() * (Long.MAX_VALUE / 2));
     }
@@ -107,7 +107,7 @@ public class BuildersTrowel extends DiggerItem {
             }
             if (!p.getAbilities().instabuild) {
                 //item.shrink(1); //place does already shrink
-                ctx.getItemInHand().hurtAndBreak(1, p, player -> player.broadcastBreakEvent(ctx.getHand()));
+                ctx.getItemInHand().hurtAndBreak(1, p, EquipmentSlot.MAINHAND);
             }
         }
 
