@@ -174,7 +174,7 @@ public class WunderKisteBlock extends AbstractChestBlock<WunderKisteBlockEntity>
             MinecraftServer server
     ) {
         if (server instanceof WunderKisteExtensionProvider extWunderkiste) {
-            return extWunderkiste.getWunderKisteExtension().getContainer(state, entity);
+            return extWunderkiste.getWunderKisteExtension().getContainer(server.registryAccess(), state, entity);
         }
         return null;
     }

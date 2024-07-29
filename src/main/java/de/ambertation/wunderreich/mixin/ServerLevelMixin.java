@@ -31,7 +31,7 @@ public abstract class ServerLevelMixin {
     @Inject(method = "saveLevelData", at = @At("TAIL"))
     public void wunderreich_save(CallbackInfo ci) {
         if (getServer() instanceof WunderKisteExtensionProvider exWunderkiste) {
-            exWunderkiste.getWunderKisteExtension().saveAll();
+            exWunderkiste.getWunderKisteExtension().saveAll(getServer().registryAccess());
         }
     }
 

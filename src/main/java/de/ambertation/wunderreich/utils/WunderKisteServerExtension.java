@@ -6,6 +6,7 @@ import de.ambertation.wunderreich.blocks.WunderKisteBlock;
 import de.ambertation.wunderreich.inventory.WunderKisteContainer;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.RegistryLayer;
@@ -36,30 +37,34 @@ public class WunderKisteServerExtension {
         return getDomain(state).domainID;
     }
 
-    public WunderKisteContainer getContainer(BlockState state, @Nullable BlockEntity entity) {
-        return getContainer(getDomain(state, entity));
+    public WunderKisteContainer getContainer(
+            HolderLookup.Provider provider,
+            BlockState state,
+            @Nullable BlockEntity entity
+    ) {
+        return getContainer(provider, getDomain(state, entity));
     }
 
-    public WunderKisteContainer getContainer(WunderKisteDomain.ID domainID) {
+    public WunderKisteContainer getContainer(HolderLookup.Provider provider, WunderKisteDomain.ID domainID) {
         return containers.computeIfAbsent(
                 WunderreichRules.Wunderkiste.haveMultiple()
                         ? domainID
                         : WunderKisteBlock.DEFAULT_DOMAIN.domainID,
-                d -> this.loadOrCreate(domainID)
+                d -> this.loadOrCreate(provider, domainID)
         );
     }
 
-    private WunderKisteContainer loadOrCreate(WunderKisteDomain.ID domainID) {
+    private WunderKisteContainer loadOrCreate(HolderLookup.Provider provider, WunderKisteDomain.ID domainID) {
         WunderKisteContainer wunderKisteContainer = new WunderKisteContainer(domainID);
-        wunderKisteContainer.load();
+        wunderKisteContainer.load(provider);
         wunderKisteContainer.addListener((container) -> {
             WunderKisteBlock.updateAllBoxes(container, false, true);
         });
         return wunderKisteContainer;
     }
 
-    public void saveAll() {
-        containers.entrySet().forEach(e -> e.getValue().save());
+    public void saveAll(HolderLookup.Provider provider) {
+        containers.entrySet().forEach(e -> e.getValue().save(provider));
     }
 
     public void onCloseServer() {

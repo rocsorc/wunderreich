@@ -6,6 +6,7 @@ import de.ambertation.wunderreich.interfaces.ActiveChestStorage;
 import de.ambertation.wunderreich.utils.WunderKisteDomain;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.SimpleContainer;
@@ -26,7 +27,7 @@ public class WunderKisteContainer extends SimpleContainer implements WorldlyCont
         this.domain = domain;
     }
 
-    public void load() {
+    public void load(HolderLookup.Provider provider) {
         CompoundTag global = LevelData.getInstance().getWunderkisteInventory(domain);
         ListTag items;
         if (!global.contains("items")) {
@@ -35,16 +36,16 @@ public class WunderKisteContainer extends SimpleContainer implements WorldlyCont
         } else {
             items = global.getList("items", 10);
         }
-        fromTag(items);
+        fromTag(provider, items);
     }
 
-    public void save() {
+    public void save(HolderLookup.Provider provider) {
         CompoundTag global = LevelData.getInstance().getWunderkisteInventory(domain);
-        global.put("items", createTag());
+        global.put("items", createTag(provider));
         LevelData.getInstance().saveWunderkisteInventory(domain);
     }
 
-    public void fromTag(ListTag listTag) {
+    public void fromTag(HolderLookup.Provider provider, ListTag listTag) {
         int j;
         for (j = 0; j < this.getContainerSize(); ++j) {
             this.setItem(j, ItemStack.EMPTY);
@@ -54,13 +55,13 @@ public class WunderKisteContainer extends SimpleContainer implements WorldlyCont
             CompoundTag compoundTag = listTag.getCompound(j);
             int k = compoundTag.getByte("Slot") & 255;
             if (k < this.getContainerSize()) {
-                this.setItem(k, ItemStack.of(compoundTag));
+                this.setItem(k, ItemStack.parseOptional(provider, compoundTag));
             }
         }
 
     }
 
-    public ListTag createTag() {
+    public ListTag createTag(HolderLookup.Provider provider) {
         ListTag listTag = new ListTag();
 
         for (int i = 0; i < this.getContainerSize(); ++i) {
@@ -68,7 +69,8 @@ public class WunderKisteContainer extends SimpleContainer implements WorldlyCont
             if (!itemStack.isEmpty()) {
                 CompoundTag compoundTag = new CompoundTag();
                 compoundTag.putByte("Slot", (byte) i);
-                itemStack.save(compoundTag);
+                //TODO: Check if this works...
+                itemStack.save(provider, compoundTag);
                 listTag.add(compoundTag);
             }
         }
@@ -95,7 +97,7 @@ public class WunderKisteContainer extends SimpleContainer implements WorldlyCont
         final ActiveChestStorage cPlayer = (ActiveChestStorage) player;
         final WunderKisteBlockEntity chest = cPlayer.getActiveWunderKiste();
         if (chest != null) {
-            save();
+            save(player.registryAccess());
             chest.stopOpen(player);
         }
 
