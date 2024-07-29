@@ -24,7 +24,10 @@ import org.jetbrains.annotations.NotNull;
 public class WhispererScreen
         extends AbstractContainerScreen<WhispererMenu> {
     private static final ResourceLocation VILLAGER_LOCATION = ResourceLocation.withDefaultNamespace(
-            "textures/gui/container/villager2.png");
+            "textures/gui/container/villager.png");
+    private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("container/villager/scroller");
+    private static final ResourceLocation SCROLLER_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("container/villager/scroller_disabled");
+
     private static final int TEXTURE_WIDTH = 512;
     private static final int TEXTURE_HEIGHT = 256;
     private static final int MERCHANT_MENU_PART_X = 99;
@@ -145,31 +148,9 @@ public class WhispererScreen
             if (this.scrollOff == pageCount) {
                 scrollerOffset = SCROLLER_MAX_Y;
             }
-            guiGraphics.blit(
-                    VILLAGER_LOCATION,
-                    x + SCROLL_BAR_START_X,
-                    y + SCROLL_BAR_TOP_POS_Y + scrollerOffset,
-                    0,
-                    0.0f,
-                    199.0f,
-                    SCROLLER_WIDTH,
-                    SCROLLER_HEIGHT,
-                    TEXTURE_WIDTH,
-                    TEXTURE_HEIGHT
-            );
+            guiGraphics.blitSprite(SCROLLER_SPRITE, x + SCROLL_BAR_START_X, y + SCROLL_BAR_TOP_POS_Y + scrollerOffset, 0, SCROLLER_WIDTH, SCROLLER_HEIGHT);
         } else {
-            guiGraphics.blit(
-                    VILLAGER_LOCATION,
-                    x + SCROLL_BAR_START_X,
-                    y + SCROLL_BAR_TOP_POS_Y,
-                    0,
-                    6.0f,
-                    199.0f,
-                    SCROLLER_WIDTH,
-                    SCROLLER_HEIGHT,
-                    TEXTURE_WIDTH,
-                    TEXTURE_HEIGHT
-            );
+            guiGraphics.blitSprite(SCROLLER_DISABLED_SPRITE, x + SCROLL_BAR_START_X, y + SCROLL_BAR_TOP_POS_Y, 0, SCROLLER_WIDTH, SCROLLER_HEIGHT);
         }
     }
 
