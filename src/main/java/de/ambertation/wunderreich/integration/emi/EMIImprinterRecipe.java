@@ -30,6 +30,7 @@ public class EMIImprinterRecipe implements EmiRecipe {
     }
 
     static void addAllRecipes(EmiRegistry emiRegistry) {
+        ImprinterRecipe.registerForLevel();
         for (ImprinterRecipe recipe : ImprinterRecipe.getRecipes()) {
             emiRegistry.addRecipe(new EMIImprinterRecipe(recipe));
         }

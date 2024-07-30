@@ -13,6 +13,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -114,7 +115,14 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     public static HolderLookup.Provider REGISTRY_PROVIDER_OR_NULL = null;
 
     @ApiStatus.Internal
+    public static void registerForLevel() {
+        if (Minecraft.getInstance() == null) return;
+        if (Minecraft.getInstance().level == null) return;
+        registerForLevel(Minecraft.getInstance().level.registryAccess());
+    }
+
     public static void registerForLevel(HolderLookup.Provider provider) {
+        if (provider == null || provider == REGISTRY_PROVIDER_OR_NULL) return;
         REGISTRY_PROVIDER_OR_NULL = provider;
         RECIPES.clear();
 

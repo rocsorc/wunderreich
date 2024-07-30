@@ -56,6 +56,7 @@ public class WhispererScreen
         super(merchantMenu, inventory, component);
         this.imageWidth = 276;
         this.inventoryLabelX = 107;
+        ImprinterRecipe.registerForLevel();
     }
 
     private void postButtonClick() {
