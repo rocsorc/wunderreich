@@ -23,10 +23,10 @@
         "value": "de.ambertation.wunderreich.client.WunderreichClient"
       }
     ],
-    "rei_server_off": [
+    "rei_server": [
       "de.ambertation.wunderreich.integration.rei.ServerPlugin"
     ],
-    "rei_client_off": [
+    "rei_client": [
       "de.ambertation.wunderreich.integration.rei.ClientPlugin"
     ],
     "modmenu": [
