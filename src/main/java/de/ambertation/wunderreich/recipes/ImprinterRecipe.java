@@ -13,7 +13,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.*;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -47,7 +50,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     public static final int COST_B_SLOT = 1;
     private static final List<ImprinterRecipe> RECIPES = new LinkedList<>();
     //    private static List<ImprinterRecipe> RECIPES_UI_SORTED = new LinkedList<>();
-    private final ResourceLocation id;
+    public final ResourceLocation id;
 
     private ImprinterRecipe(
             ResourceLocation id,
@@ -108,10 +111,10 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         Registry.register(BuiltInRegistries.RECIPE_TYPE, Type.ID, Type.INSTANCE);
     }
 
-    public static RegistryAccess.Frozen REGISTRY_PROVIDER_OR_NULL = null;
+    public static HolderLookup.Provider REGISTRY_PROVIDER_OR_NULL = null;
 
     @ApiStatus.Internal
-    public static void registerForLevel(RegistryAccess.Frozen provider) {
+    public static void registerForLevel(HolderLookup.Provider provider) {
         REGISTRY_PROVIDER_OR_NULL = provider;
         RECIPES.clear();
 
