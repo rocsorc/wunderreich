@@ -280,19 +280,22 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
             ItemStack input = ItemStack.STREAM_CODEC.decode(packetBuffer);
             ItemStack output = ItemStack.STREAM_CODEC.decode(packetBuffer);
             int baseXP = packetBuffer.readVarInt();
-            ItemStack type = ItemStack.STREAM_CODEC.decode(packetBuffer);
+            ItemStack type = ItemStack.OPTIONAL_STREAM_CODEC.decode(packetBuffer);
 
             return new ImprinterRecipe(id, e, input, output, baseXP, type);
         }
 
 
         public static void toNetwork(RegistryFriendlyByteBuf packetBuffer, ImprinterRecipe recipe) {
+//            if (recipe.input.isEmpty()) Wunderreich.LOGGER.error("Recipe " + recipe.id + " has no input");
+//            if (recipe.output.isEmpty()) Wunderreich.LOGGER.error("Recipe " + recipe.id + " has no output");
+//            if (recipe.icon.isEmpty()) Wunderreich.LOGGER.error("Recipe " + recipe.id + " has no icon");
             packetBuffer.writeResourceLocation(recipe.id);
             Enchantment.STREAM_CODEC.encode(packetBuffer, recipe.enchantment);
             ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.input);
             ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.output);
             packetBuffer.writeVarInt(recipe.baseXP);
-            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.icon);
+            ItemStack.OPTIONAL_STREAM_CODEC.encode(packetBuffer, recipe.icon);
         }
     }
 }
