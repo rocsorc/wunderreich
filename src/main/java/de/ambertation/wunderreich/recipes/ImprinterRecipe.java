@@ -260,7 +260,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<ImprinterReci
 
     @Override
     public String toString() {
-        return "[Imprinter Recipe] " + this.id;
+        return this.id.toString();
     }
 
     public static class Type implements RecipeType<ImprinterRecipe> {

@@ -96,33 +96,35 @@ public class WhispererMenu
         final ImprinterRecipe.ImprinterInput recipeInput = getImprinterInput();
         Wunderreich.LOGGER.info("MENU SELECT BEST Input: " + selectedRule + ", " + recipeInput + " | SERVER? " + (this.player instanceof ServerPlayer));
 
+        var suggestedRule = selectedRule;
         //not even a valid input anymore, reset the selected Rule
         if (recipeInput == null) {
-            setSelectedRule(null);
+            suggestedRule = null;
             if (andCreate) this.resultSlots.setItem(0, ItemStack.EMPTY);
         } else {
             //try to find the best matching rule
-            if (selectedRule == null) {
-                final var best = getEnchants().stream()
-                                              .filter(rule -> rule.satisfiedBy(recipeInput))
-                                              .sorted((a, b) -> b.input.getCount() - a.input.getCount())
-                                              .findFirst()
-                                              .orElse(null);
-                this.setSelectedRule(best);
+            if (suggestedRule == null) {
+                suggestedRule = getEnchants().stream()
+                                             .filter(rule -> rule.satisfiedBy(recipeInput))
+                                             .sorted((a, b) -> b.input.getCount() - a.input.getCount())
+                                             .findFirst()
+                                             .orElse(null);
             }
 
             //we have a selected Rule, check if the input can still fulfill the rule
-            if (selectedRule != null) {
-                if (selectedRule.satisfiedBy(recipeInput)) {
-                    if (andCreate) this.resultSlots.setItem(0, selectedRule.assemble());
+            if (suggestedRule != null) {
+                if (suggestedRule.satisfiedBy(recipeInput)) {
+                    if (andCreate) this.resultSlots.setItem(0, suggestedRule.assemble());
                 } else {
-                    setSelectedRule(null);
+                    suggestedRule = null;
                     if (andCreate) this.resultSlots.setItem(0, ItemStack.EMPTY);
                 }
             } else {
-                setSelectedRule(null);
                 if (andCreate) this.resultSlots.setItem(0, ItemStack.EMPTY);
             }
+        }
+        if ((recipeInput != null || suggestedRule != null) && suggestedRule != selectedRule) {
+            setSelectedRule(suggestedRule);
         }
     }
 
@@ -131,7 +133,9 @@ public class WhispererMenu
     @Override
     public void createResult() {
         if (!updating) {
+            this.updating = true;
             selectBestRecipe(true);
+            this.updating = false;
             this.broadcastChanges();
         }
     }
@@ -181,7 +185,6 @@ public class WhispererMenu
                     createExperience(serverLevel, xp);
                 }
                 this.playImprintSound();
-
 
                 this.setSelectedRule(null);
             }
@@ -250,7 +253,6 @@ public class WhispererMenu
     }
 
     public void tryMoveItems(WhisperRule rule) {
-
         if (rule != null) {
             ItemStack slotItem = this.inputSlots.getItem(INGREDIENT_SLOT_A);
             boolean didMove = true;
@@ -266,33 +268,47 @@ public class WhispererMenu
             if (didMove &&
                     this.inputSlots.getItem(INGREDIENT_SLOT_A).isEmpty() &&
                     this.inputSlots.getItem(INGREDIENT_SLOT_B).isEmpty()) {
-                this.updating = true;
-                this.moveFromInventoryToPaymentSlot(INGREDIENT_SLOT_A, rule.getInput());
-                this.moveFromInventoryToPaymentSlot(INGREDIENT_SLOT_B, WhisperRule.BLANK);
-                this.updating = false;
-                createResult();
+                if (inventoryHas(rule.getInput()) && inventoryHas(WhisperRule.BLANK)) {
+                    this.updating = true;
+                    this.moveFromInventoryToPaymentSlot(INGREDIENT_SLOT_A, rule.getInput());
+                    this.moveFromInventoryToPaymentSlot(INGREDIENT_SLOT_B, WhisperRule.BLANK);
+                    this.updating = false;
+                    createResult();
+                }
             }
         }
     }
 
-    private void moveFromInventoryToPaymentSlot(int containerIndex, ItemStack inventory) {
-        if (!inventory.isEmpty()) {
+    private boolean inventoryHas(ItemStack itemStack) {
+        if (itemStack.isEmpty()) return false;
+        int count = itemStack.getCount();
+        for (int i = INV_SLOT_START; i < HOTBAR_SLOT_END; ++i) {
+            final ItemStack slotStack = this.slots.get(i).getItem();
+            if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(itemStack, slotStack)) {
+                count -= slotStack.getCount();
+            }
+            if (count <= 0) return true;
+        }
+        return false;
+    }
+
+    private void moveFromInventoryToPaymentSlot(int containerIndex, ItemStack recipeStack) {
+        if (!recipeStack.isEmpty()) {
             for (int j = INV_SLOT_START; j < HOTBAR_SLOT_END; ++j) {
                 final ItemStack slotStack = this.slots.get(j).getItem();
-                if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(inventory, slotStack)) {
+                if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(recipeStack, slotStack)) {
                     final ItemStack containerStack = this.inputSlots.getItem(containerIndex);
                     final int occupiedCount = containerStack.isEmpty() ? 0 : containerStack.getCount();
-                    final int moveCount = Math.min(inventory.getMaxStackSize() - occupiedCount, slotStack.getCount());
+                    final int moveCount = Math.min(recipeStack.getCount() - occupiedCount, slotStack.getCount());
                     final ItemStack result = slotStack.copy();
                     final int count = occupiedCount + moveCount;
 
-                    if (count > inventory.getMaxStackSize()) break;
+                    if (count > recipeStack.getMaxStackSize()) break;
 
                     slotStack.shrink(moveCount);
                     result.setCount(count);
 
                     this.inputSlots.setItem(containerIndex, result);
-
                 }
             }
         }
@@ -319,12 +335,14 @@ public class WhispererMenu
 
     @Override
     public void broadcastFullState() {
+        if (this.updating) return;
         //broadcastSelectedRule(true);
         super.broadcastFullState();
     }
 
     @Override
     public void broadcastChanges() {
+        if (this.updating) return;
         //broadcastSelectedRule(false);
         super.broadcastChanges();
     }
