@@ -1,5 +1,6 @@
 package de.ambertation.wunderreich.recipes;
 
+import de.ambertation.wunderlib.utils.EnvHelper;
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.config.Configs;
 import de.ambertation.wunderreich.gui.whisperer.WhisperContainer;
@@ -26,10 +27,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 
@@ -76,14 +74,20 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         return Wunderreich.ID(Type.ID.getPath() + "/" + e.unwrapKey().orElseThrow().location().getPath());
     }
 
+    public static RecipeManager GLOBAL_RECIPE_MANAGER;
+
     public static Stream<ImprinterRecipe> getAllVariants() {
-        if (Minecraft.getInstance() != null && Minecraft.getInstance().level != null && Minecraft.getInstance().level.getRecipeManager() != null) {
-            return Minecraft.getInstance().level
-                    .getRecipeManager().getAllRecipesFor(ImprinterRecipe.Type.INSTANCE)
+        if (GLOBAL_RECIPE_MANAGER == null && EnvHelper.isClient()) {
+            if (Minecraft.getInstance() != null && Minecraft.getInstance().level != null && Minecraft.getInstance().level.getRecipeManager() != null)
+                GLOBAL_RECIPE_MANAGER = Minecraft.getInstance().level.getRecipeManager();
+        }
+
+        if (GLOBAL_RECIPE_MANAGER != null) {
+            return GLOBAL_RECIPE_MANAGER
+                    .getAllRecipesFor(ImprinterRecipe.Type.INSTANCE)
                     .stream()
                     .map(r -> r.value())
                     .filter(r -> r.enchantment.is(EnchantmentTags.TRADEABLE));
-
         } else {
             ImprinterRecipe.registerForLevel();
             return ImprinterRecipe
@@ -114,13 +118,14 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     private static void registerForLevel() {
         if (Minecraft.getInstance() == null) return;
         if (Minecraft.getInstance().level == null) return;
-        registerForLevel(Minecraft.getInstance().level.registryAccess());
+        registerForLevel(Minecraft.getInstance().level.getRecipeManager(), Minecraft.getInstance().level.registryAccess());
     }
 
     private static HolderLookup.Provider REGISTRY_PROVIDER_OR_NULL = null;
 
     @ApiStatus.Internal
-    public static void registerForLevel(HolderLookup.Provider provider) {
+    public static void registerForLevel(RecipeManager manager, HolderLookup.Provider provider) {
+        GLOBAL_RECIPE_MANAGER = manager;
         if (provider == REGISTRY_PROVIDER_OR_NULL) return;
         REGISTRY_PROVIDER_OR_NULL = provider;
         RECIPES.clear();

@@ -33,7 +33,7 @@ public class RecipeManagerMixin {
             ProfilerFiller profiler,
             CallbackInfo info
     ) {
-        ImprinterRecipe.registerForLevel(registries);
+        ImprinterRecipe.registerForLevel((RecipeManager) (Object) this, registries);
         WunderreichRecipes.RECIPES
                 .entrySet()
                 .stream()
