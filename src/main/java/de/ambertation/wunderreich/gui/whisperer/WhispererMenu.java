@@ -186,7 +186,7 @@ public class WhispererMenu
                     .getItem(INGREDIENT_SLOT_B)
                     .isEmpty()) {
                 final WhisperRule rule = this.getEnchants().get(ruleIndex);
-                ItemStack costA = rule.getInputA();
+                ItemStack costA = rule.getInput();
                 this.moveFromInventoryToPaymentSlot(INGREDIENT_SLOT_A, costA);
                 ItemStack costB = rule.getInputB();
                 this.moveFromInventoryToPaymentSlot(INGREDIENT_SLOT_B, costB);

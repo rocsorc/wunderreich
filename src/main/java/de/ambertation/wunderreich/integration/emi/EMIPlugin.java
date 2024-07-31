@@ -92,6 +92,6 @@ public class EMIPlugin implements dev.emi.emi.api.EmiPlugin {
         emiRegistry.addCategory(IMPRINTER_CATEGORY);
         emiRegistry.addWorkstation(IMPRINTER_CATEGORY, IMPRINTER_WORKSTATION);
 
-        EMIImprinterRecipe.addAllRecipes(emiRegistry);
+        EMIImprinterRecipe.addAllRecipes(emiRegistry, manager);
     }
 }

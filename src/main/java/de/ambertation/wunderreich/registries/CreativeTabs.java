@@ -5,7 +5,6 @@ import de.ambertation.wunderreich.blocks.*;
 import de.ambertation.wunderreich.config.Configs;
 import de.ambertation.wunderreich.items.TrainedVillagerWhisperer;
 import de.ambertation.wunderreich.items.WunderKisteItem;
-import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -106,7 +105,7 @@ public class CreativeTabs {
                                                   .map(ItemStack::new)
                                                   .toList()
                     );
-                    ImprinterRecipe.registerForLevel();
+
                     TrainedVillagerWhisperer.addAllVariants(stacks);
 
                     stacks.sort(Comparator.comparing(stack -> {

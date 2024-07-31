@@ -2,7 +2,6 @@ package de.ambertation.wunderreich.mixin;
 
 import de.ambertation.wunderreich.config.LevelData;
 import de.ambertation.wunderreich.interfaces.WunderKisteExtensionProvider;
-import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 import de.ambertation.wunderreich.utils.WunderKisteDomain;
 import de.ambertation.wunderreich.utils.WunderKisteServerExtension;
 
@@ -57,7 +56,6 @@ public abstract class MinecraftServerMixin implements WunderKisteExtensionProvid
         LevelData.getInstance().loadNewLevel(levelStorageAccess);
 
         wunderkiste.onStartServer(worldStem.registries());
-        ImprinterRecipe.registerForLevel(worldStem.registries().compositeAccess());
     }
 
     @Shadow

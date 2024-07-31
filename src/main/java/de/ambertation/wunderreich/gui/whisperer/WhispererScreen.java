@@ -56,7 +56,6 @@ public class WhispererScreen
         super(merchantMenu, inventory, component);
         this.imageWidth = 276;
         this.inventoryLabelX = 107;
-        ImprinterRecipe.registerForLevel();
     }
 
     private void postButtonClick() {
@@ -175,7 +174,7 @@ public class WhispererScreen
                     continue;
                 }
 
-                ItemStack costA = rule.getInputA();
+                ItemStack costA = rule.getInput();
                 ItemStack costB = rule.getInputB();
                 ItemStack result = rule.output;
                 guiGraphics.pose().pushPose();
@@ -185,7 +184,7 @@ public class WhispererScreen
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().scale(0.5f, 0.5f, 0.5f);
 
-                guiGraphics.renderFakeItem(rule.type, 2 * (left - 2), 2 * (decorateY + 7));
+                guiGraphics.renderFakeItem(rule.icon, 2 * (left - 2), 2 * (decorateY + 7));
                 guiGraphics.pose().popPose();
                 this.renderAndDecorateCostA(guiGraphics, costA, left + 12, decorateY);
                 if (!costB.isEmpty()) {
@@ -322,7 +321,7 @@ public class WhispererScreen
                     ItemStack itemStack = WhispererScreen.this.menu
                             .getEnchants()
                             .get(this.index + WhispererScreen.this.scrollOff)
-                            .getInputA();
+                            .getInput();
                     if (!itemStack.isEmpty()) {
                         guiGraphics.renderTooltip(font, itemStack, i, j);
                     }

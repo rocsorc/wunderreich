@@ -7,7 +7,6 @@ import de.ambertation.wunderreich.gui.whisperer.WhisperRule;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
 import de.ambertation.wunderreich.registries.WunderreichRecipes;
 import de.ambertation.wunderreich.registries.WunderreichRules;
-import de.ambertation.wunderreich.utils.ItemUtil;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
@@ -23,6 +22,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,30 +51,17 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     public static final int COST_A_SLOT = 0;
     public static final int COST_B_SLOT = 1;
     private static final List<ImprinterRecipe> RECIPES = new LinkedList<>();
-    //    private static List<ImprinterRecipe> RECIPES_UI_SORTED = new LinkedList<>();
     public final ResourceLocation id;
 
     private ImprinterRecipe(
             ResourceLocation id,
             Holder<Enchantment> enchantment,
-            Ingredient inputA,
-            Ingredient inputB,
-            int baseXP
-    ) {
-        super(enchantment, inputA, inputB, baseXP);
-        this.id = id;
-    }
-
-    private ImprinterRecipe(
-            ResourceLocation id,
-            Holder<Enchantment> enchantment,
-            Ingredient inputA,
-            Ingredient inputB,
+            ItemStack input,
             ItemStack output,
             int baseXP,
             ItemStack type
     ) {
-        super(enchantment, inputA, inputB, output, baseXP, type);
+        super(enchantment, input, output, baseXP, type);
         this.id = id;
     }
 
@@ -88,22 +76,31 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         return Wunderreich.ID(Type.ID.getPath() + "/" + e.unwrapKey().orElseThrow().location().getPath());
     }
 
+    public static Stream<ImprinterRecipe> getAllVariants() {
+        if (Minecraft.getInstance() != null && Minecraft.getInstance().level != null && Minecraft.getInstance().level.getRecipeManager() != null) {
+            return Minecraft.getInstance().level
+                    .getRecipeManager().getAllRecipesFor(ImprinterRecipe.Type.INSTANCE)
+                    .stream()
+                    .map(r -> r.value())
+                    .filter(r -> r.enchantment.is(EnchantmentTags.TRADEABLE));
+
+        } else {
+            ImprinterRecipe.registerForLevel();
+            return ImprinterRecipe
+                    .getRecipes()
+                    .stream()
+                    .filter(r -> r.enchantment.is(EnchantmentTags.TRADEABLE));
+        }
+    }
+
     public static List<ImprinterRecipe> getRecipes() {
-        return RECIPES;
+        return getAllVariants().toList();
     }
 
     public static List<ImprinterRecipe> getUISortedRecipes() {
-        return RECIPES
-                .stream()
+        return getAllVariants()
                 .sorted(Comparator.comparing(a -> a.getCategory() + ":" + a.getName()))
                 .collect(Collectors.toList());
-    }
-
-    private static void resortRecipes() {
-//        RECIPES_UI_SORTED = RECIPES
-//                .stream()
-//                .sorted(Comparator.comparing(a -> a.getCategory() + ":" + a.getName()))
-//                .collect(Collectors.toList());
     }
 
     @ApiStatus.Internal
@@ -112,17 +109,19 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         Registry.register(BuiltInRegistries.RECIPE_TYPE, Type.ID, Type.INSTANCE);
     }
 
-    public static HolderLookup.Provider REGISTRY_PROVIDER_OR_NULL = null;
 
     @ApiStatus.Internal
-    public static void registerForLevel() {
+    private static void registerForLevel() {
         if (Minecraft.getInstance() == null) return;
         if (Minecraft.getInstance().level == null) return;
-        registerForLevel(Minecraft.getInstance().level.registryAccess());
+        registerForLevel2(Minecraft.getInstance().level.registryAccess());
     }
 
-    public static void registerForLevel(HolderLookup.Provider provider) {
-        if (provider == null || provider == REGISTRY_PROVIDER_OR_NULL) return;
+    private static HolderLookup.Provider REGISTRY_PROVIDER_OR_NULL = null;
+
+    @ApiStatus.Internal
+    public static void registerForLevel2(HolderLookup.Provider provider) {
+        if (provider == REGISTRY_PROVIDER_OR_NULL) return;
         REGISTRY_PROVIDER_OR_NULL = provider;
         RECIPES.clear();
 
@@ -131,7 +130,6 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
             final var enchantments = provider.lookup(Registries.ENCHANTMENT).orElse(null);
             if (enchantments != null) {
                 enchantments.listElements()
-                            .filter(e -> e.is(EnchantmentTags.TRADEABLE))
                             .forEach(e -> {
                                 ResourceLocation ID = makeID(e);
                                 if (Configs.RECIPE_CONFIG.newBooleanFor(ID.getPath(), ID).get())
@@ -141,25 +139,29 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
                 enchants.sort(Comparator.comparing(a -> WhisperRule.getFullname(a)
                                                                    .getString()));
 
+                RegistryOps<JsonElement> registryOps = REGISTRY_PROVIDER_OR_NULL == null
+                        ? null
+                        : REGISTRY_PROVIDER_OR_NULL.createSerializationContext(JsonOps.INSTANCE);
+
                 enchants.forEach(e -> {
                     ImprinterRecipe r = new ImprinterRecipe(e);
                     RECIPES.add(r);
-                    if (REGISTRY_PROVIDER_OR_NULL == null) {
+                    if (registryOps == null) {
                         Wunderreich.LOGGER.error("Registry provider is null. Can not create Imprinter Recipes.");
                         return;
                     }
-                    RegistryOps<JsonElement> registryOps = REGISTRY_PROVIDER_OR_NULL.createSerializationContext(JsonOps.INSTANCE);
-                    WunderreichRecipes.RECIPES.put(
-                            r.id,
-                            Serializer.CODEC.codec()
-                                            .encodeStart(registryOps, r)
-                                            .getOrThrow()
-                    );
+                    var res = Serializer.CODEC_SERIALIZER.codec()
+                                                         .encodeStart(registryOps, r);
+                    if (res.isError()) {
+                        Wunderreich.LOGGER.error("Error creating Imprinter Recipe: " + res
+                                .error()
+                                .get() + " for " + r.id);
+                        return;
+                    }
+                    WunderreichRecipes.RECIPES.put(r.id, res.getOrThrow());
                 });
             }
         }
-
-        resortRecipes();
     }
 
     @Override
@@ -169,15 +171,15 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
 
     @Override
     public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.of(Ingredient.EMPTY, inputA, inputB);
+        return NonNullList.of(Ingredient.EMPTY, Ingredient.of(input), WhisperRule.BLANK_INGREDIENT);
     }
 
 
     @Override
     public boolean matches(WhisperContainer.Input inv, Level level) {
         if (inv.size() < 2) return false;
-        return this.inputA.test(inv.getItem(COST_A_SLOT)) && this.inputB.test(inv.getItem(COST_B_SLOT)) ||
-                this.inputA.test(inv.getItem(COST_B_SLOT)) && this.inputB.test(inv.getItem(COST_A_SLOT));
+        return isRequiredItem(this.input, inv.getItem(COST_A_SLOT)) && isRequiredItem(BLANK, inv.getItem(COST_B_SLOT)) ||
+                isRequiredItem(this.input, inv.getItem(COST_B_SLOT)) && isRequiredItem(BLANK, inv.getItem(COST_A_SLOT));
     }
 
     @Override
@@ -195,7 +197,6 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     public @NotNull ItemStack getResultItem(HolderLookup.Provider registryAccess) {
         return this.output;
     }
-
 
     @Override
     public @NotNull RecipeSerializer<?> getSerializer() {
@@ -234,14 +235,28 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     }
 
     private static class Serializer implements RecipeSerializer<ImprinterRecipe> {
+        private static final Codec<ResourceKey<Enchantment>> KEY_CODEC = ResourceKey.codec(Registries.ENCHANTMENT);
+        private static final MapCodec<ImprinterRecipe> CODEC_SERIALIZER = RecordCodecBuilder.mapCodec(instance -> instance
+                .group(
+                        Codec.STRING.fieldOf("type").forGetter(r -> Type.ID.toString()),
+                        ResourceLocation.CODEC.fieldOf("id").forGetter(r -> r.id),
+                        ResourceLocation.CODEC
+                                .fieldOf("enchantment")
+                                .forGetter(r -> r.enchantment.unwrapKey().orElseThrow().location()),
+                        ItemStack.CODEC.fieldOf("input").forGetter(r -> r.input),
+                        ItemStack.CODEC.fieldOf("output").forGetter(r -> r.output),
+                        Codec.INT.fieldOf("baseXP").forGetter(r -> r.baseXP),
+                        ItemStack.CODEC.optionalFieldOf("icon", ItemStack.EMPTY).forGetter(r -> r.icon)
+                )
+                .apply(instance, (t, a, b, d, e, f, g) -> null));
+
         public static final MapCodec<ImprinterRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("id").forGetter(r -> r.id),
                 Enchantment.CODEC.fieldOf("enchantment").forGetter(r -> r.enchantment),
-                ItemUtil.CODEC_INGREDIENT_WITH_NBT.fieldOf("inputA").forGetter(r -> r.inputA),
-                ItemUtil.CODEC_INGREDIENT_WITH_NBT.fieldOf("inputB").forGetter(r -> r.inputB),
-                ItemUtil.CODEC_ITEM_STACK_WITH_NBT.fieldOf("output").forGetter(r -> r.output),
+                ItemStack.CODEC.fieldOf("input").forGetter(r -> r.input),
+                ItemStack.CODEC.fieldOf("output").forGetter(r -> r.output),
                 Codec.INT.fieldOf("baseXP").forGetter(r -> r.baseXP),
-                ItemStack.CODEC.fieldOf("type").forGetter(r -> r.type)
+                ItemStack.CODEC.optionalFieldOf("icon", ItemStack.EMPTY).forGetter(r -> r.icon)
         ).apply(instance, ImprinterRecipe::new));
         public static final StreamCodec<RegistryFriendlyByteBuf, ImprinterRecipe> STREAM_CODEC = StreamCodec.of(ImprinterRecipe.Serializer::toNetwork, ImprinterRecipe.Serializer::fromNetwork);
 
@@ -262,24 +277,22 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         public static @NotNull ImprinterRecipe fromNetwork(RegistryFriendlyByteBuf packetBuffer) {
             ResourceLocation id = packetBuffer.readResourceLocation();
             Holder<Enchantment> e = Enchantment.STREAM_CODEC.decode(packetBuffer);
-            Ingredient inputA = Ingredient.CONTENTS_STREAM_CODEC.decode(packetBuffer);
-            Ingredient inputB = Ingredient.CONTENTS_STREAM_CODEC.decode(packetBuffer);
+            ItemStack input = ItemStack.STREAM_CODEC.decode(packetBuffer);
             ItemStack output = ItemStack.STREAM_CODEC.decode(packetBuffer);
             int baseXP = packetBuffer.readVarInt();
             ItemStack type = ItemStack.STREAM_CODEC.decode(packetBuffer);
 
-            return new ImprinterRecipe(id, e, inputA, inputB, output, baseXP, type);
+            return new ImprinterRecipe(id, e, input, output, baseXP, type);
         }
 
 
         public static void toNetwork(RegistryFriendlyByteBuf packetBuffer, ImprinterRecipe recipe) {
             packetBuffer.writeResourceLocation(recipe.id);
             Enchantment.STREAM_CODEC.encode(packetBuffer, recipe.enchantment);
-            Ingredient.CONTENTS_STREAM_CODEC.encode(packetBuffer, recipe.inputA);
-            Ingredient.CONTENTS_STREAM_CODEC.encode(packetBuffer, recipe.inputB);
+            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.input);
             ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.output);
             packetBuffer.writeVarInt(recipe.baseXP);
-            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.type);
+            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.icon);
         }
     }
 }

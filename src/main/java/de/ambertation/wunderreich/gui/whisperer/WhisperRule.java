@@ -15,51 +15,38 @@ import net.minecraft.world.item.enchantment.Enchantments;
 
 
 public class WhisperRule {
+    public static final ItemStack BLANK = new ItemStack(WunderreichItems.BLANK_WHISPERER);
+    public static final Ingredient BLANK_INGREDIENT = Ingredient.of(BLANK);
     public final Holder<Enchantment> enchantment;
-    public final Ingredient inputA;
-    public final Ingredient inputB;
+    public final ItemStack input;
     public final ItemStack output;
-    public final ItemStack type;
+    public final ItemStack icon;
     public final int baseXP;
 
     private WhisperRule(Holder<Enchantment> enchantment, EnchantmentInfo nfo) {
-        this(
-                enchantment,
-                Ingredient.of(nfo.inputA),
-                Ingredient.of(new ItemStack(WunderreichItems.BLANK_WHISPERER)),
-                nfo.baseXP,
-                nfo.type
-        );
+        this(enchantment, nfo.input, nfo.baseXP, nfo.type);
     }
 
-    protected WhisperRule(Holder<Enchantment> enchantment, Ingredient inputA, Ingredient inputB, int baseXP) {
-        this(enchantment, inputA, inputB, baseXP, new EnchantmentInfo(enchantment).type);
+    protected WhisperRule(Holder<Enchantment> enchantment, ItemStack input, int baseXP) {
+        this(enchantment, input, baseXP, new EnchantmentInfo(enchantment).type);
     }
 
-    protected WhisperRule(
-            Holder<Enchantment> enchantment,
-            Ingredient inputA,
-            Ingredient inputB,
-            int baseXP,
-            ItemStack type
-    ) {
-        this(enchantment, inputA, inputB, TrainedVillagerWhisperer.createForEnchantment(enchantment), baseXP, type);
+    protected WhisperRule(Holder<Enchantment> enchantment, ItemStack input, int baseXP, ItemStack icon) {
+        this(enchantment, input, TrainedVillagerWhisperer.createForEnchantment(enchantment), baseXP, icon);
     }
 
     protected WhisperRule(
             Holder<Enchantment> enchantment,
-            Ingredient inputA,
-            Ingredient inputB,
+            ItemStack input,
             ItemStack output,
             int baseXP,
-            ItemStack type
+            ItemStack icon
     ) {
         this.enchantment = enchantment;
         this.baseXP = baseXP;
         this.output = output;
-        this.inputA = inputA;
-        this.inputB = inputB;
-        this.type = type;
+        this.input = input;
+        this.icon = icon;
     }
 
     protected WhisperRule(Holder<Enchantment> enchantment) {
@@ -92,41 +79,37 @@ public class WhisperRule {
         return mutableComponent;
     }
 
-    private boolean isRequiredItem(ItemStack itemStack, Ingredient itemStack2) {
-        if (itemStack2.isEmpty() && itemStack.isEmpty()) {
-            return true;
-        } else {
-            ItemStack itemStack3 = itemStack.copy();
-            itemStack3.setDamageValue(itemStack3.getDamageValue());
-            return itemStack2.test(itemStack3)  /*&& (!itemStack2.gethasTag() || itemStack3.hasTag() && NbtUtils.compareNbt(itemStack2.getTag(), itemStack3.getTag(), false))*/;
+    public static boolean isRequiredItem(ItemStack itemStack, ItemStack itemStack2) {
+        if (itemStack2.isEmpty()) {
+            return itemStack.isEmpty();
         }
+        return itemStack.is(itemStack2.getItem());
     }
 
     public boolean satisfiedBy(ItemStack itemStack, ItemStack itemStack2) {
-        return this.isRequiredItem(itemStack, this.inputA) && itemStack.getCount() >= this
-                .getInputA()
-                .getCount() && this.isRequiredItem(itemStack2, this.inputB) && itemStack2.getCount() >= this
-                .getInputB()
-                .getCount();
+        return isRequiredItem(itemStack, this.input)
+                && itemStack.getCount() >= this.getInput().getCount()
+                && isRequiredItem(itemStack2, BLANK)
+                && itemStack2.getCount() >= this.getInputB().getCount();
     }
 
     public ItemStack assemble() {
         return this.output.copy();
     }
 
-    public ItemStack getInputA() {
-        return inputA.getItems()[0];
+    public ItemStack getInput() {
+        return input;
     }
 
     public ItemStack getInputB() {
-        return inputB.getItems()[0];
+        return BLANK;
     }
 
     public boolean take(ItemStack itemStack, ItemStack itemStack2) {
         if (!this.satisfiedBy(itemStack, itemStack2)) {
             return false;
         } else {
-            itemStack.shrink(this.getInputA().getCount());
+            itemStack.shrink(this.getInput().getCount());
             itemStack2.shrink(this.getInputB().getCount());
 
             return true;
