@@ -3,9 +3,9 @@ package de.ambertation.wunderreich.recipes;
 import de.ambertation.wunderlib.utils.EnvHelper;
 import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.config.Configs;
-import de.ambertation.wunderreich.gui.whisperer.WhisperContainer;
 import de.ambertation.wunderreich.gui.whisperer.WhisperRule;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
+import de.ambertation.wunderreich.registries.WunderreichItems;
 import de.ambertation.wunderreich.registries.WunderreichRecipes;
 import de.ambertation.wunderreich.registries.WunderreichRules;
 
@@ -44,8 +44,36 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContainer.Input> {
+public class ImprinterRecipe extends WhisperRule implements Recipe<ImprinterRecipe.ImprinterInput> {
+    public record ImprinterInput(ItemStack ingredient, ItemStack whisperer) implements RecipeInput {
+        @Override
+        public ItemStack getItem(int i) {
+            if (i == 0) return ingredient;
+            if (i == 1) return whisperer;
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public int size() {
+            return 2;
+        }
+
+        public boolean hasWhisperer() {
+            return !whisperer.isEmpty() && whisperer.is(WunderreichItems.BLANK_WHISPERER);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer("ImprinterInput{");
+            sb.append("ingredient=").append(ingredient);
+            sb.append(", whisperer=").append(whisperer);
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
     public static final int COST_A_SLOT = 0;
     public static final int COST_B_SLOT = 1;
     private static final List<ImprinterRecipe> RECIPES = new LinkedList<>();
@@ -179,16 +207,20 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
         return NonNullList.of(Ingredient.EMPTY, Ingredient.of(input), WhisperRule.BLANK_INGREDIENT);
     }
 
+    public boolean canBuildFrom(@Nullable ImprinterRecipe.ImprinterInput inv) {
+        if (inv == null || !inv.hasWhisperer()) return false;
+        return isRequiredItem(this.input, inv.ingredient);
+    }
 
     @Override
-    public boolean matches(WhisperContainer.Input inv, Level level) {
+    public boolean matches(ImprinterRecipe.ImprinterInput inv, Level level) {
         if (inv.size() < 2) return false;
         return isRequiredItem(this.input, inv.getItem(COST_A_SLOT)) && isRequiredItem(BLANK, inv.getItem(COST_B_SLOT)) ||
                 isRequiredItem(this.input, inv.getItem(COST_B_SLOT)) && isRequiredItem(BLANK, inv.getItem(COST_A_SLOT));
     }
 
     @Override
-    public ItemStack assemble(WhisperContainer.Input recipeInput, HolderLookup.Provider provider) {
+    public ItemStack assemble(ImprinterRecipe.ImprinterInput recipeInput, HolderLookup.Provider provider) {
         return this.output.copy();
     }
 
@@ -224,6 +256,11 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "[Imprinter Recipe] " + this.id;
     }
 
     public static class Type implements RecipeType<ImprinterRecipe> {

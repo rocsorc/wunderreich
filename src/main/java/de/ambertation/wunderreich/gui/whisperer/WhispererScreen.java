@@ -59,9 +59,8 @@ public class WhispererScreen
     }
 
     private void postButtonClick() {
-        this.menu.setSelectionHint(this.shopItem);
-        this.menu.tryMoveItems(this.shopItem);
-        SelectWhisperMessage.send(this.shopItem);
+        ImprinterRecipe selectedRule = this.menu.selectByIndex(this.shopItem);
+        SelectWhisperMessage.send(selectedRule.id);
     }
 
     @Override
@@ -175,7 +174,6 @@ public class WhispererScreen
                 }
 
                 ItemStack costA = rule.getInput();
-                ItemStack costB = rule.getInputB();
                 ItemStack result = rule.output;
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
@@ -187,19 +185,19 @@ public class WhispererScreen
                 guiGraphics.renderFakeItem(rule.icon, 2 * (left - 2), 2 * (decorateY + 7));
                 guiGraphics.pose().popPose();
                 this.renderAndDecorateCostA(guiGraphics, costA, left + 12, decorateY);
-                if (!costB.isEmpty()) {
-                    guiGraphics.renderFakeItem(
-                            costB,
-                            paddingX + TRADE_BUTTON_X + SELL_ITEM_2_X,
-                            decorateY
-                    );
-                    guiGraphics.renderItemDecorations(
-                            this.font,
-                            costB,
-                            paddingX + TRADE_BUTTON_X + SELL_ITEM_2_X,
-                            decorateY
-                    );
-                }
+
+                guiGraphics.renderFakeItem(
+                        WhisperRule.BLANK,
+                        paddingX + TRADE_BUTTON_X + SELL_ITEM_2_X,
+                        decorateY
+                );
+                guiGraphics.renderItemDecorations(
+                        this.font,
+                        WhisperRule.BLANK,
+                        paddingX + TRADE_BUTTON_X + SELL_ITEM_2_X,
+                        decorateY
+                );
+
                 this.renderButtonArrows(guiGraphics, rule, paddingX, decorateY);
                 guiGraphics.renderFakeItem(
                         result,

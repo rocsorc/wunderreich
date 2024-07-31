@@ -1,6 +1,7 @@
 package de.ambertation.wunderreich.gui.whisperer;
 
 import de.ambertation.wunderreich.items.TrainedVillagerWhisperer;
+import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 import de.ambertation.wunderreich.registries.WunderreichItems;
 
 import net.minecraft.ChatFormatting;
@@ -8,6 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -79,18 +81,52 @@ public class WhisperRule {
         return mutableComponent;
     }
 
-    public static boolean isRequiredItem(ItemStack itemStack, ItemStack itemStack2) {
-        if (itemStack2.isEmpty()) {
-            return itemStack.isEmpty();
-        }
-        return itemStack.is(itemStack2.getItem());
+    public static boolean isRequiredItem(ItemStack itemToTest, ItemStack requiredItem) {
+        if (requiredItem == null || itemToTest == null) return false;
+        if (requiredItem.isEmpty() || itemToTest.isEmpty()) return false;
+        return itemToTest.is(requiredItem.getItem());
+    }
+
+    public static boolean isRequiredItem(ItemStack itemToTest, Item requiredItem) {
+        if (requiredItem == null || itemToTest == null) return false;
+        if (itemToTest.isEmpty()) return false;
+        return itemToTest.is(requiredItem);
     }
 
     public boolean satisfiedBy(ItemStack itemStack, ItemStack itemStack2) {
         return isRequiredItem(itemStack, this.input)
                 && itemStack.getCount() >= this.getInput().getCount()
                 && isRequiredItem(itemStack2, BLANK)
-                && itemStack2.getCount() >= this.getInputB().getCount();
+                && itemStack2.getCount() >= 1;
+    }
+
+    public boolean take(ItemStack itemStack, ItemStack itemStack2) {
+        if (!this.satisfiedBy(itemStack, itemStack2)) {
+            return false;
+        } else {
+            itemStack.shrink(this.getInput().getCount());
+            itemStack2.shrink(1);
+
+            return true;
+        }
+    }
+
+    public boolean satisfiedBy(ImprinterRecipe.ImprinterInput recipeInput) {
+        return isRequiredItem(recipeInput.ingredient(), this.input)
+                && recipeInput.ingredient().getCount() >= this.getInput().getCount()
+                && isRequiredItem(recipeInput.whisperer(), WunderreichItems.BLANK_WHISPERER)
+                && recipeInput.whisperer().getCount() >= 1;
+    }
+
+    public boolean take(ImprinterRecipe.ImprinterInput recipeInput) {
+        if (!this.satisfiedBy(recipeInput)) {
+            return false;
+        } else {
+            recipeInput.ingredient().shrink(this.getInput().getCount());
+            recipeInput.whisperer().shrink(1);
+
+            return true;
+        }
     }
 
     public ItemStack assemble() {
@@ -99,21 +135,6 @@ public class WhisperRule {
 
     public ItemStack getInput() {
         return input;
-    }
-
-    public ItemStack getInputB() {
-        return BLANK;
-    }
-
-    public boolean take(ItemStack itemStack, ItemStack itemStack2) {
-        if (!this.satisfiedBy(itemStack, itemStack2)) {
-            return false;
-        } else {
-            itemStack.shrink(this.getInput().getCount());
-            itemStack2.shrink(this.getInputB().getCount());
-
-            return true;
-        }
     }
 
     public Component getNameComponent() {
