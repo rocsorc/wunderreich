@@ -114,13 +114,13 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<WhisperContai
     private static void registerForLevel() {
         if (Minecraft.getInstance() == null) return;
         if (Minecraft.getInstance().level == null) return;
-        registerForLevel2(Minecraft.getInstance().level.registryAccess());
+        registerForLevel(Minecraft.getInstance().level.registryAccess());
     }
 
     private static HolderLookup.Provider REGISTRY_PROVIDER_OR_NULL = null;
 
     @ApiStatus.Internal
-    public static void registerForLevel2(HolderLookup.Provider provider) {
+    public static void registerForLevel(HolderLookup.Provider provider) {
         if (provider == REGISTRY_PROVIDER_OR_NULL) return;
         REGISTRY_PROVIDER_OR_NULL = provider;
         RECIPES.clear();
