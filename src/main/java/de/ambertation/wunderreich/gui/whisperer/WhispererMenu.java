@@ -1,6 +1,5 @@
 package de.ambertation.wunderreich.gui.whisperer;
 
-import de.ambertation.wunderreich.Wunderreich;
 import de.ambertation.wunderreich.network.SelectWhisperMessage;
 import de.ambertation.wunderreich.recipes.ImprinterRecipe;
 import de.ambertation.wunderreich.registries.WunderreichBlocks;
@@ -92,9 +91,9 @@ public class WhispererMenu
     }
 
     public void selectBestRecipe(boolean andCreate) {
-        Wunderreich.LOGGER.info("MENU SELECT BEST Creating result: " + selectedRule + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_A) + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_B) + " | SERVER? " + (this.player instanceof ServerPlayer));
+//        Wunderreich.LOGGER.info("MENU SELECT BEST Creating result: " + selectedRule + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_A) + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_B) + " | SERVER? " + (this.player instanceof ServerPlayer));
         final ImprinterRecipe.ImprinterInput recipeInput = getImprinterInput();
-        Wunderreich.LOGGER.info("MENU SELECT BEST Input: " + selectedRule + ", " + recipeInput + " | SERVER? " + (this.player instanceof ServerPlayer));
+//        Wunderreich.LOGGER.info("MENU SELECT BEST Input: " + selectedRule + ", " + recipeInput + " | SERVER? " + (this.player instanceof ServerPlayer));
 
         var suggestedRule = selectedRule;
         //not even a valid input anymore, reset the selected Rule
@@ -164,9 +163,9 @@ public class WhispererMenu
 
     @Override
     protected void onTake(Player player, ItemStack itemStack) {
-        Wunderreich.LOGGER.info("MENU ONTAKE" + selectedRule + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_A) + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_B) + ", " + itemStack + " | SERVER? " + (this.player instanceof ServerPlayer));
+//        Wunderreich.LOGGER.info("MENU ONTAKE" + selectedRule + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_A) + ", " + this.inputSlots.getItem(INGREDIENT_SLOT_B) + ", " + itemStack + " | SERVER? " + (this.player instanceof ServerPlayer));
         final ImprinterRecipe.ImprinterInput recipeInput = getImprinterInput();
-        Wunderreich.LOGGER.info("MENU ONTAKE Input: " + selectedRule + ", " + recipeInput + " | SERVER? " + (this.player instanceof ServerPlayer));
+//        Wunderreich.LOGGER.info("MENU ONTAKE Input: " + selectedRule + ", " + recipeInput + " | SERVER? " + (this.player instanceof ServerPlayer));
         if (selectedRule != null) {
             final int xp = selectedRule.baseXP;
             if (selectedRule.canBuildFrom(recipeInput)) {
@@ -220,7 +219,7 @@ public class WhispererMenu
                         (selectedID != null && !selectedID.equals(ruleID))
         ) {
             this.selectedRule = rule;
-            Wunderreich.LOGGER.info("MENU Selecting RULE: " + rule + " | SERVER? " + (this.player instanceof ServerPlayer));
+//            Wunderreich.LOGGER.info("MENU Selecting RULE: " + rule + " | SERVER? " + (this.player instanceof ServerPlayer));
         }
 
         return this.selectedRule;
@@ -228,7 +227,7 @@ public class WhispererMenu
 
     public ImprinterRecipe selectByID(ResourceLocation ruleID) {
         ImprinterRecipe newRule = getRuleByID(ruleID);
-        Wunderreich.LOGGER.info("MENU Selecting by ID: " + ruleID + ", " + newRule);
+//        Wunderreich.LOGGER.info("MENU Selecting by ID: " + ruleID + ", " + newRule);
 
         return setSelectedRule(newRule);
     }
@@ -246,7 +245,7 @@ public class WhispererMenu
     public ImprinterRecipe selectByIndex(int ruleIndex) {
         ImprinterRecipe newRule = null;
         if (ruleIndex < this.getEnchants().size()) newRule = this.getEnchants().get(ruleIndex);
-        Wunderreich.LOGGER.info("MENU Selecting by Index: " + ruleIndex + ", " + newRule);
+//        Wunderreich.LOGGER.info("MENU Selecting by Index: " + ruleIndex + ", " + newRule);
 
         var res = setSelectedRule(newRule);
         return res;
@@ -328,7 +327,7 @@ public class WhispererMenu
             if (player instanceof LocalPlayer) {
                 SelectWhisperMessage.send(selectedRule);
             }
-            Wunderreich.LOGGER.info("MENU Broadcast RULE: " + selectedRule + " | SERVER? " + (this.player instanceof ServerPlayer));
+//            Wunderreich.LOGGER.info("MENU Broadcast RULE: " + selectedRule + " | SERVER? " + (this.player instanceof ServerPlayer));
             lastSentRule = selectedId;
         }
     }
