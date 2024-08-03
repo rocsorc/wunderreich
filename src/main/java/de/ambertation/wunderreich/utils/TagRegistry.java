@@ -89,4 +89,8 @@ public class TagRegistry<T> {
     public TagKey<T> createCommon(String name) {
         return TagKey.create(getRegistryKey(), ResourceLocation.fromNamespaceAndPath("c", name));
     }
+
+    public TagKey<T> createWover(String name) {
+        return TagKey.create(getRegistryKey(), ResourceLocation.fromNamespaceAndPath("wover", name));
+    }
 }
