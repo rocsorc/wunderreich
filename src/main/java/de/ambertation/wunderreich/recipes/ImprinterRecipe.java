@@ -99,7 +99,10 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<ImprinterReci
 
     @NotNull
     private static ResourceLocation makeID(Holder<Enchantment> e) {
-        return Wunderreich.ID(Type.ID.getPath() + "/" + e.unwrapKey().orElseThrow().location().getPath());
+        final var eID = e.unwrapKey().orElseThrow().location();
+        if (eID.getNamespace().equals("minecraft"))
+            return Wunderreich.ID(Type.ID.getPath() + "/" + eID.getPath());
+        return Wunderreich.ID(Type.ID.getPath() + "/" + eID.getNamespace() + "/" + eID.getPath());
     }
 
     public static RecipeManager GLOBAL_RECIPE_MANAGER;
@@ -191,6 +194,7 @@ public class ImprinterRecipe extends WhisperRule implements Recipe<ImprinterReci
                                 .get() + " for " + r.id);
                         return;
                     }
+                    //Wunderreich.LOGGER.info("Created Imprinter Recipe: " + r + " for " + WhisperRule.getFullname(e));
                     WunderreichRecipes.RECIPES.put(r.id, res.getOrThrow());
                 });
             }
