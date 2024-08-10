@@ -1,6 +1,5 @@
 package de.ambertation.wunderreich;
 
-import de.ambertation.wunderlib.math.sdf.SDF;
 import de.ambertation.wunderlib.utils.Version;
 import de.ambertation.wunderreich.advancements.AdvancementsJsonBuilder;
 import de.ambertation.wunderreich.config.Configs;
@@ -48,7 +47,7 @@ public class Wunderreich implements ModInitializer {
             VERSION = new Version(modContainer.getMetadata().getVersion().toString());
         }
 
-        SDF.ensureStaticallyLoaded();
+        //SDF.ensureStaticallyLoaded();
 
         WunderreichDataComponents.ensureStaticallyLoaded();
         WunderreichBlockEntities.register();
